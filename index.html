@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengumuman Kelulusan SPMB SMP NEGERI 1 BULUKUMBA 2025/2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1877f2;
+      --primary-dark: #166fe5;
+      --secondary: #42b72a;
+      --secondary-dark: #36a420;
+      --text-dark: #1c1e21;
+      --text-light: #606770;
+      --bg-light: #f0f2f5;
+      --white: #ffffff;
+      --border-color: #dddfe2;
+      --success: #42b72a;
+      --success-light: #ffff80; /* Kuning terang */
+      --success-dark: #2a7d1b;
+      --danger: #fa383e;
+      --danger-light: #ffffff; /* Putih terang */
+      --danger-dark: #c41f24;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      line-height: 1.5;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 16px;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    
+    .logo-header {
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo-header img {
+      max-width: 100%;
+      height: auto;
+      max-height: 120px;
+      object-fit: contain;
+    }
+    
+    h1 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    
+    h2 {
+      color: var(--text-light);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .search-form {
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .result {
+      display: none;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    
+    .status-container {
+      text-align: center;
+      margin-bottom: 16px;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+    }
+    
+    .status-container.lulus {
+      background-color: var(--success-dark);
+      padding: 20px;
+    }
+    
+    .status-container.tidak-lulus {
+      background-color: var(--danger-dark);
+      padding: 20px 20px 10px 20px;
+    }
+    
+    .status {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .status.lulus {
+      color: var(--success-light);
+    }
+    
+    .status.tidak-lulus {
+      color: var(--danger-light);
+    }
+    
+    /* Pesan Bar Style untuk Tidak Lulus */
+    .pesan-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+    }
+    
+    .pesan-bar {
+      background: #111;
+      color: #fff;
+      padding: 1px 10px; /* Disempitkan padding atas-bawah */
+      font-size: 16px;
+      margin-bottom: 2px; /* Jarak antar baris diperkecil */
+      text-align: center;
+      font-weight: normal;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      line-height: 1.3; /* Menyesuaikan line-height agar lebih rapat */
+    }
+    
+    .pesan-bar:last-child {
+      margin-bottom: 0;
+    }
+    
+    .card-detail {
+      background: var(--white);
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      padding: 0;
+      margin: 0 auto;
+      border: 1px solid var(--border-color);
+      border-top: none;
+      overflow: hidden;
+    }
+    
+    .row-detail {
+      display: flex;
+      align-items: stretch;
+    }
+    
+    .logo-detail {
+      background: #f5f5f5;
+      padding: 15px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 90px;
+    }
+    
+    .logo-detail img {
+      width: 65px;
+      height: auto;
+      object-fit: contain;
+    }
+    
+    table.detail-table {
+      border-collapse: collapse;
+      width: 100%;
+      background: transparent;
+    }
+    
+    table.detail-table tr {
+      border-bottom: 1px solid #eee;
+    }
+    
+    table.detail-table tr:last-child {
+      border-bottom: none;
+    }
+    
+    table.detail-table td {
+      padding: 12px;
+      font-size: 14px;
+    }
+    
+    table.detail-table td.label {
+      font-weight: bold;
+      color: var(--text-dark);
+      width: 140px;
+      background: #f8f8f8;
+    }
+    
+    table.detail-table td.value {
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 16px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+    
+    .school-info {
+      margin-top: 4px; /* Jarak diperkecil */
+      font-weight: 500;
+      color: var(--primary); /* Warna sama dengan judul */
+      text-align: center;
+      line-height: 1.4; /* Line height diperkecil */
+    }
+    
+    .contact-info {
+      margin-top: 8px;
+      font-weight: 500;
+      color: var(--primary);
+      display: none; /* Sembunyikan di halaman awal */
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(5px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .spinner {
+      width: 70px;
+      height: 70px;
+      border: 8px solid rgba(24, 119, 242, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s linear infinite;
+      margin-bottom: 30px;
+    }
+    
+    .loading-text {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+    
+    .slideshow-container {
+      text-align: center;
+      max-width: 80%;
+    }
+    
+    .slideshow-item {
+      display: none;
+      animation: fadeEffect 0.5s;
+    }
+    
+    .slideshow-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    
+    .slideshow-school {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+    
+    .error-message {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+    }
+    
+    @keyframes fadeEffect {
+      from {opacity: 0.4}
+      to {opacity: 1}
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .highlight {
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    
+    @media (max-width: 480px) {
+      .row-detail {
+        flex-direction: column;
+      }
+      
+      .logo-detail {
+        padding: 16px;
+        min-width: auto;
+      }
+      
+      table.detail-table td {
+        padding: 10px;
+        font-size: 13px;
+      }
+      
+      table.detail-table td.label {
+        width: 120px;
+      }
+      
+      h1 {
+        font-size: 1.3rem;
+      }
+      
+      .pesan-bar {
+        font-size: 14px;
+        padding: 1px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo-container">
+        <div class="logo-header">
+          <!-- Logo header -->
+          <img src="logosekolah.png" alt="Logo SMP Negeri 1 Bulukumba">
+        </div>
+      </div>
+      <h1>PENGUMUMAN KELULUSAN SPMB</h1>
+      <h2>Tahun Ajaran 2025/2026</h2>
+    </div>
+    
+    <div class="search-form">
+      <div class="form-group">
+        <label for="noPendaftaran">Nomor Pendaftaran</label>
+        <input type="text" id="noPendaftaran" placeholder="Masukkan nomor pendaftaran Anda" required>
+      </div>
+      <button type="button" id="cekButton">Cek Kelulusan</button>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+    
+    <div class="result" id="resultContainer">
+      <div class="status-container" id="statusContainer">
+        <div class="status" id="statusKelulusan">LULUS</div>
+        <div id="pesanContainer" style="display: none;">
+          <div class="pesan-container">
+            <div class="pesan-bar">Hasil seleksi belum sesuai harapan</div>
+            <div class="pesan-bar">Terima kasih atas partisipasinya</div>
+            <div class="pesan-bar">Semoga sukses di kesempatan yang lain</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-detail">
+        <div class="row-detail">
+          <div class="logo-detail">
+            <!-- Logo detail -->
+            <img src="logokiri.png" alt="Logo SMP Negeri 1 Bulukumba">
+          </div>
+          <table class="detail-table">
+            <tr>
+              <td class="label">Nama</td>
+              <td class="value" id="nama">-</td>
+            </tr>
+            <tr>
+              <td class="label">TTL</td>
+              <td class="value" id="ttl">-</td>
+            </tr>
+            <tr>
+              <td class="label">Asal Sekolah</td>
+              <td class="value" id="asalSekolah">-</td>
+            </tr>
+            <tr>
+              <td class="label">Jalur</td>
+              <td class="value" id="jalur">-</td>
+            </tr>
+            <tr>
+              <td class="label">Nama Ayah</td>
+              <td class="value" id="namaAyah">-</td>
+            </tr>
+            <tr>
+              <td class="label">Keterangan</td>
+              <td class="value" id="keterangan">-</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>SPMB SMP Negeri 1 Bulukumba Tahun Ajaran 2025/2026</p>
+      <div class="school-info">
+        <p>email – smpn01_bulukumba@yahoo.co.id</p>
+      </div>
+      <p class="contact-info" id="contactInfo">Narahubung: Andizzul – 085299613808</p>
+    </div>
+  </div>
+  
+  <div class="overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Memproses data...</div>
+    <div class="slideshow-container" id="slideshowContainer">
+      <!-- Slideshow items akan diisi dari Google Sheets -->
+    </div>
+  </div>
+  
+  <script>
+    // Konfigurasi Google Sheets
+    // GANTI URL INI dengan URL Google Sheets Anda yang sudah dipublikasikan ke web
+    const SHEET_ID = '1_ldkkmwrLwZhw8UK0dWu3JZjBCe3vY6WGK_Dnhe3ghY'; // Ganti dengan ID spreadsheet Anda
+    const SHEET_NAME = 'data_siswa'; // Ganti dengan nama sheet Anda
+    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+    
+    // Variabel untuk menyimpan data siswa
+    let dataSiswa = [];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const cekButton = document.getElementById('cekButton');
+      const noPendaftaranInput = document.getElementById('noPendaftaran');
+      const resultContainer = document.getElementById('resultContainer');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const statusContainer = document.getElementById('statusContainer');
+      const statusKelulusan = document.getElementById('statusKelulusan');
+      const pesanContainer = document.getElementById('pesanContainer');
+      const nama = document.getElementById('nama');
+      const ttl = document.getElementById('ttl');
+      const asalSekolah = document.getElementById('asalSekolah');
+      const jalur = document.getElementById('jalur');
+      const namaAyah = document.getElementById('namaAyah');
+      const keterangan = document.getElementById('keterangan');
+      const contactInfo = document.getElementById('contactInfo');
+      const errorMessage = document.getElementById('errorMessage');
+      const slideshowContainer = document.getElementById('slideshowContainer');
+      
+      // Fungsi untuk mengambil data dari Google Sheets
+      async function fetchData() {
+        try {
+          const response = await fetch(SHEET_URL);
+          if (!response.ok) {
+            throw new Error('Gagal mengambil data');
+          }
+          
+          const csvData = await response.text();
+          const parsedData = parseCSV(csvData);
+          
+          if (parsedData.length > 0) {
+            dataSiswa = parsedData;
+            // Buat elemen slideshow dari data Google Sheets
+            createSlideshowItems();
+            return true;
+          } else {
+            throw new Error('Tidak ada data yang ditemukan');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          errorMessage.textContent = 'Terjadi kesalahan saat memuat data. Silakan coba lagi nanti.';
+          errorMessage.style.display = 'block';
+          return false;
+        }
+      }
+      
+      // Fungsi untuk parsing data CSV
+      function parseCSV(csvText) {
+        const lines = csvText.split('\n');
+        const headers = lines[0].split(',').map(header => header.replace(/"/g, '').trim());
+        
+        const result = [];
+        for (let i = 1; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+          
+          const values = lines[i].split(',');
+          const entry = {};
+          
+          for (let j = 0; j < headers.length; j++) {
+            let value = values[j] || '';
+            // Bersihkan tanda kutip
+            value = value.replace(/"/g, '').trim();
+            entry[headers[j]] = value;
+          }
+          
+          result.push(entry);
+        }
+        
+        return result;
+      }
+      
+      // Fungsi untuk membuat elemen slideshow dari data Google Sheets
+      function createSlideshowItems() {
+        slideshowContainer.innerHTML = '';
+        
+        // Ambil maksimal 10 data untuk slideshow
+        const slideshowData = dataSiswa.slice(0, 10);
+        
+        slideshowData.forEach(siswa => {
+          const item = document.createElement('div');
+          item.className = 'slideshow-item';
+          
+          const nameElement = document.createElement('div');
+          nameElement.className = 'slideshow-name';
+          nameElement.textContent = siswa.nama;
+          
+          const schoolElement = document.createElement('div');
+          schoolElement.className = 'slideshow-school';
+          schoolElement.textContent = siswa.asalSekolah;
+          
+          item.appendChild(nameElement);
+          item.appendChild(schoolElement);
+          slideshowContainer.appendChild(item);
+        });
+      }
+      
+      // Fungsi untuk slideshow
+      let slideIndex = 0;
+      
+      function showSlides() {
+        const slideshowItems = document.querySelectorAll('.slideshow-item');
+        if (slideshowItems.length === 0) return;
+        
+        for (let i = 0; i < slideshowItems.length; i++) {
+          slideshowItems[i].style.display = "none";  
+        }
+        slideIndex++;
+        if (slideIndex > slideshowItems.length) {slideIndex = 1}
+        slideshowItems[slideIndex-1].style.display = "block";
+        setTimeout(showSlides, 200); // Ganti setiap 200ms (sangat cepat)
+      }
+      
+      // Fungsi untuk menyesuaikan lebar pesan bar
+      function adjustPesanBarWidth() {
+        const pesanBars = document.querySelectorAll('.pesan-bar');
+        pesanBars.forEach(bar => {
+          // Reset width untuk pengukuran yang akurat
+          bar.style.width = 'auto';
+          // Ukur konten dan tambahkan sedikit padding
+          const contentWidth = bar.offsetWidth;
+          bar.style.width = contentWidth + 'px';
+        });
+      }
+      
+      // Ambil data saat halaman dimuat
+      fetchData().then(success => {
+        if (!success) {
+          console.error('Gagal memuat data');
+        }
+      });
+      
+      cekButton.addEventListener('click', async function() {
+        const noPendaftaran = noPendaftaranInput.value.trim();
+        
+        if (!noPendaftaran) {
+          alert('Silakan masukkan nomor pendaftaran Anda!');
+          return;
+        }
+        
+        // Reset pesan error
+        errorMessage.style.display = 'none';
+        
+        // Jika data belum diambil, coba ambil lagi
+        if (dataSiswa.length === 0) {
+          const success = await fetchData();
+          if (!success) {
+            return;
+          }
+        }
+        
+        // Tampilkan loading
+        loadingOverlay.style.display = 'flex';
+        
+        // Mulai slideshow
+        showSlides();
+        
+        // Simulasi loading selama 7 detik
+        setTimeout(function() {
+          loadingOverlay.style.display = 'none';
+          
+          // Cari data siswa
+          const siswa = dataSiswa.find(s => s.noPendaftaran === noPendaftaran);
+          
+          if (siswa) {
+            // Tampilkan hasil
+            resultContainer.style.display = 'block';
+            
+            // Isi data
+            nama.textContent = siswa.nama;
+            ttl.textContent = siswa.ttl;
+            asalSekolah.textContent = siswa.asalSekolah;
+            jalur.textContent = siswa.jalur;
+            namaAyah.textContent = siswa.namaAyah;
+            
+            if (siswa.status === "LULUS") {
+              statusContainer.className = "status-container lulus";
+              statusKelulusan.textContent = "LULUS";
+              statusKelulusan.className = "status lulus";
+              pesanContainer.style.display = "none";
+              keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${siswa.kolomUrutan}</span> urutan <span class="highlight">${siswa.nomorUrutan}</span> pada lembar pengumuman.`;
+              contactInfo.style.display = 'block';
+            } else {
+              statusContainer.className = "status-container tidak-lulus";
+              statusKelulusan.textContent = "MOHON MAAF";
+              statusKelulusan.className = "status tidak-lulus";
+              pesanContainer.style.display = "block";
+              keterangan.textContent = "Mohon maaf, Anda tidak lulus seleksi.";
+              contactInfo.style.display = 'none';
+              
+              // Sesuaikan lebar pesan bar setelah ditampilkan
+              setTimeout(adjustPesanBarWidth, 10);
+            }
+          } else {
+            errorMessage.textContent = 'Nomor pendaftaran tidak ditemukan!';
+            errorMessage.style.display = 'block';
+            resultContainer.style.display = 'none';
+          }
+        }, 7000);
+      });
+      
+      // Sesuaikan lebar pesan bar saat ukuran window berubah
+      window.addEventListener('resize', function() {
+        if (pesanContainer.style.display !== 'none') {
+          adjustPesanBarWidth();
+        }
+      });
+    });
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94ac5f9ac6d36bb1',t:'MTc0OTA5MTk0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

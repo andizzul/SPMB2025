@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -527,7 +525,10 @@
           }
           
           const csvData = await response.text();
+          console.log("CSV Data:", csvData); // Debug: Lihat data CSV yang diterima
+          
           const parsedData = parseCSV(csvData);
+          console.log("Parsed Data:", parsedData); // Debug: Lihat hasil parsing
           
           if (parsedData.length > 0) {
             dataSiswa = parsedData;
@@ -545,23 +546,69 @@
         }
       }
       
-      // Fungsi untuk parsing data CSV
+      // Fungsi untuk parsing data CSV yang lebih baik
       function parseCSV(csvText) {
         const lines = csvText.split('\n');
-        const headers = lines[0].split(',').map(header => header.replace(/"/g, '').trim());
+        if (lines.length <= 1) return [];
+        
+        // Ekstrak header dengan benar
+        const headerLine = lines[0];
+        const headers = [];
+        let currentHeader = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < headerLine.length; i++) {
+          const char = headerLine[i];
+          
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            headers.push(currentHeader.trim().replace(/^"|"$/g, ''));
+            currentHeader = '';
+          } else {
+            currentHeader += char;
+          }
+        }
+        
+        // Tambahkan header terakhir
+        if (currentHeader) {
+          headers.push(currentHeader.trim().replace(/^"|"$/g, ''));
+        }
+        
+        console.log("Headers:", headers); // Debug: Lihat header yang diekstrak
         
         const result = [];
+        
+        // Proses setiap baris data
         for (let i = 1; i < lines.length; i++) {
           if (!lines[i].trim()) continue;
           
-          const values = lines[i].split(',');
-          const entry = {};
+          const values = [];
+          let currentValue = '';
+          inQuotes = false;
           
+          for (let j = 0; j < lines[i].length; j++) {
+            const char = lines[i][j];
+            
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              values.push(currentValue.trim().replace(/^"|"$/g, ''));
+              currentValue = '';
+            } else {
+              currentValue += char;
+            }
+          }
+          
+          // Tambahkan nilai terakhir
+          if (currentValue) {
+            values.push(currentValue.trim().replace(/^"|"$/g, ''));
+          }
+          
+          // Buat objek dengan nama kolom yang tepat
+          const entry = {};
           for (let j = 0; j < headers.length; j++) {
-            let value = values[j] || '';
-            // Bersihkan tanda kutip
-            value = value.replace(/"/g, '').trim();
-            entry[headers[j]] = value;
+            entry[headers[j]] = j < values.length ? values[j] : '';
           }
           
           result.push(entry);
@@ -583,11 +630,11 @@
           
           const nameElement = document.createElement('div');
           nameElement.className = 'slideshow-name';
-          nameElement.textContent = siswa.nama;
+          nameElement.textContent = siswa.nama || "Nama Tidak Tersedia";
           
           const schoolElement = document.createElement('div');
           schoolElement.className = 'slideshow-school';
-          schoolElement.textContent = siswa.asalSekolah;
+          schoolElement.textContent = siswa.asalSekolah || "Sekolah Tidak Tersedia";
           
           item.appendChild(nameElement);
           item.appendChild(schoolElement);
@@ -661,24 +708,28 @@
           
           // Cari data siswa
           const siswa = dataSiswa.find(s => s.noPendaftaran === noPendaftaran);
+          console.log("Siswa yang ditemukan:", siswa); // Debug: Lihat data siswa yang ditemukan
           
           if (siswa) {
             // Tampilkan hasil
             resultContainer.style.display = 'block';
             
             // Isi data
-            nama.textContent = siswa.nama;
-            ttl.textContent = siswa.ttl;
-            asalSekolah.textContent = siswa.asalSekolah;
-            jalur.textContent = siswa.jalur;
-            namaAyah.textContent = siswa.namaAyah;
+            nama.textContent = siswa.nama || "-";
+            ttl.textContent = siswa.ttl || "-";
+            asalSekolah.textContent = siswa.asalSekolah || "-";
+            jalur.textContent = siswa.jalur || "-";
+            namaAyah.textContent = siswa.namaAyah || "-";
             
-            if (siswa.status === "LULUS") {
+            // Periksa status kelulusan (case insensitive)
+            const statusLulus = (siswa.status || "").toUpperCase() === "LULUS";
+            
+            if (statusLulus) {
               statusContainer.className = "status-container lulus";
               statusKelulusan.textContent = "LULUS";
               statusKelulusan.className = "status lulus";
               pesanContainer.style.display = "none";
-              keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${siswa.kolomUrutan}</span> urutan <span class="highlight">${siswa.nomorUrutan}</span> pada lembar pengumuman.`;
+              keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${siswa.kolomUrutan || "-"}</span> urutan <span class="highlight">${siswa.nomorUrutan || "-"}</span> pada lembar pengumuman.`;
               contactInfo.style.display = 'block';
             } else {
               statusContainer.className = "status-container tidak-lulus";
@@ -707,5 +758,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94ac5f9ac6d36bb1',t:'MTc0OTA5MTk0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94aca271e3ec604a',t:'MTc0OTA5NDY3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

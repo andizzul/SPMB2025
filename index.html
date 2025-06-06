@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -564,7 +562,7 @@
           console.log('Data CSV diterima', csvData.substring(0, 100) + '...');
           
           // Gunakan data dummy untuk testing jika diperlukan
-          const useDummyData = false;
+          const useDummyData = true; // Ubah ke false untuk menggunakan data asli
           let parsedData;
           
           if (useDummyData) {
@@ -588,6 +586,39 @@
                 asalSekolah: 'SD Negeri 2 Bulukumba',
                 jalur: 'Prestasi',
                 namaAyah: 'Bapak Budi',
+                status: 'TIDAK LULUS',
+                kolomUrutan: '',
+                nomorUrutan: ''
+              },
+              {
+                noPendaftaran: '123-456',
+                nama: 'Citra Siswi',
+                ttl: 'Bulukumba, 20 Maret 2010',
+                asalSekolah: 'SD Negeri 3 Bulukumba',
+                jalur: 'Reguler',
+                namaAyah: 'Bapak Citra',
+                status: 'LULUS',
+                kolomUrutan: 'B',
+                nomorUrutan: '2'
+              },
+              {
+                noPendaftaran: 'REG-2023-001',
+                nama: 'Deni Siswa',
+                ttl: 'Bulukumba, 25 April 2010',
+                asalSekolah: 'SD Negeri 4 Bulukumba',
+                jalur: 'Reguler',
+                namaAyah: 'Bapak Deni',
+                status: 'LULUS',
+                kolomUrutan: 'C',
+                nomorUrutan: '3'
+              },
+              {
+                noPendaftaran: 'PRES-2023-001',
+                nama: 'Eka Siswi',
+                ttl: 'Bulukumba, 30 Mei 2010',
+                asalSekolah: 'SD Negeri 5 Bulukumba',
+                jalur: 'Prestasi',
+                namaAyah: 'Bapak Eka',
                 status: 'TIDAK LULUS',
                 kolomUrutan: '',
                 nomorUrutan: ''
@@ -834,7 +865,7 @@
         return result;
       }
       
-      // Fungsi untuk mencari siswa dengan nomor pendaftaran (lebih fleksibel)
+      // Fungsi untuk mencari siswa dengan nomor pendaftaran (DIPERBAIKI)
       function findSiswa(noPendaftaran) {
         if (!noPendaftaran || dataSiswa.length === 0) {
           console.log('Nomor pendaftaran kosong atau tidak ada data siswa');
@@ -853,53 +884,69 @@
           }
         });
         
-        // Normalisasi nomor pendaftaran (hapus semua karakter non-alfanumerik)
-        const normalizedInput = cleanNoPendaftaran.replace(/[^a-z0-9]/gi, '');
-        console.log('Nomor pendaftaran yang dinormalisasi:', normalizedInput);
+        // PERBAIKAN: Coba semua metode pencarian secara berurutan
         
-        // Cari dengan kecocokan eksak terlebih dahulu
-        for (let i = 0; i < dataSiswa.length; i++) {
-          const siswa = dataSiswa[i];
+        // 1. Coba pencarian eksak (case insensitive)
+        for (const siswa of dataSiswa) {
+          if (!siswa.noPendaftaran) continue;
           
-          // Periksa apakah siswa memiliki properti noPendaftaran
-          if (!siswa.noPendaftaran) {
-            continue;
-          }
-          
-          // Bersihkan nomor pendaftaran siswa dari spasi dan ubah ke huruf kecil
-          const cleanSiswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
-          
-          // Periksa kecocokan eksak
-          if (cleanSiswaNoPendaftaran === cleanNoPendaftaran) {
+          const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
+          if (siswaNoPendaftaran === cleanNoPendaftaran) {
             console.log('Siswa ditemukan dengan kecocokan eksak:', siswa);
             return siswa;
           }
+        }
+        
+        // 2. Coba pencarian dengan normalisasi (hapus semua karakter non-alfanumerik)
+        const normalizedInput = cleanNoPendaftaran.replace(/[^a-z0-9]/gi, '');
+        console.log('Nomor pendaftaran yang dinormalisasi:', normalizedInput);
+        
+        for (const siswa of dataSiswa) {
+          if (!siswa.noPendaftaran) continue;
           
-          // Normalisasi nomor pendaftaran siswa
-          const normalizedSiswa = cleanSiswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
+          const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
+          const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
           
-          // Periksa kecocokan dengan nomor yang dinormalisasi
           if (normalizedSiswa === normalizedInput) {
             console.log('Siswa ditemukan dengan kecocokan normalisasi:', siswa);
             return siswa;
           }
         }
         
-        // Jika tidak ditemukan dengan kecocokan eksak, coba dengan kecocokan parsial
-        console.log('Mencoba pencarian dengan kecocokan parsial...');
-        for (let i = 0; i < dataSiswa.length; i++) {
-          const siswa = dataSiswa[i];
+        // 3. Coba pencarian dengan substring (apakah input adalah bagian dari nomor pendaftaran)
+        for (const siswa of dataSiswa) {
+          if (!siswa.noPendaftaran) continue;
           
-          if (!siswa.noPendaftaran) {
-            continue;
+          const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
+          
+          if (siswaNoPendaftaran.includes(cleanNoPendaftaran) || cleanNoPendaftaran.includes(siswaNoPendaftaran)) {
+            console.log('Siswa ditemukan dengan kecocokan substring:', siswa);
+            return siswa;
           }
+        }
+        
+        // 4. Coba pencarian dengan substring pada nomor yang dinormalisasi
+        for (const siswa of dataSiswa) {
+          if (!siswa.noPendaftaran) continue;
           
-          const cleanSiswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
-          const normalizedSiswa = cleanSiswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
+          const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
+          const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
           
-          // Periksa apakah nomor pendaftaran siswa mengandung input
           if (normalizedSiswa.includes(normalizedInput) || normalizedInput.includes(normalizedSiswa)) {
-            console.log('Siswa ditemukan dengan kecocokan parsial:', siswa);
+            console.log('Siswa ditemukan dengan kecocokan substring normalisasi:', siswa);
+            return siswa;
+          }
+        }
+        
+        // 5. Coba pencarian dengan kesamaan awal (apakah nomor pendaftaran dimulai dengan input)
+        for (const siswa of dataSiswa) {
+          if (!siswa.noPendaftaran) continue;
+          
+          const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
+          const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
+          
+          if (normalizedSiswa.startsWith(normalizedInput) || normalizedInput.startsWith(normalizedSiswa)) {
+            console.log('Siswa ditemukan dengan kecocokan awalan:', siswa);
             return siswa;
           }
         }
@@ -1082,7 +1129,7 @@
           }
         }
         
-        // Cari data siswa
+        // Cari data siswa dengan fungsi yang diperbaiki
         const siswa = findSiswa(noPendaftaran);
         
         if (!siswa) {
@@ -1166,5 +1213,5 @@
       console.log('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b59fae4626fd61',t:'MTc0OTE4ODkzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5b09307a540a7',t:'MTc0OTE4OTYzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

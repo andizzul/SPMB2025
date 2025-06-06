@@ -366,6 +366,17 @@
       display: none;
     }
     
+    .data-info {
+      background-color: #e3f2fd;
+      color: #0d47a1;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+    
     @keyframes fadeEffect {
       from {opacity: 0.4}
       to {opacity: 1}
@@ -444,6 +455,7 @@
       </div>
       <button type="button" id="cekButton">Cek Kelulusan</button>
       <div class="error-message" id="errorMessage"></div>
+      <div class="data-info" id="dataInfo"></div>
     </div>
     
     <div class="result" id="resultContainer">
@@ -522,6 +534,7 @@
     
     // Variabel untuk menyimpan data siswa
     let dataSiswa = [];
+    let dataLoaded = false;
     
     document.addEventListener('DOMContentLoaded', function() {
       const cekButton = document.getElementById('cekButton');
@@ -540,6 +553,7 @@
       const keterangan = document.getElementById('keterangan');
       const contactInfo = document.getElementById('contactInfo');
       const errorMessage = document.getElementById('errorMessage');
+      const dataInfo = document.getElementById('dataInfo');
       const slideshowContainer = document.getElementById('slideshowContainer');
       
       // Variabel untuk slideshow
@@ -549,6 +563,10 @@
       // Fungsi untuk mengambil data dari Google Sheets
       async function fetchData() {
         try {
+          // Tampilkan informasi bahwa data sedang dimuat
+          dataInfo.textContent = 'Memuat data kelulusan...';
+          dataInfo.style.display = 'block';
+          
           // Tambahkan parameter waktu untuk menghindari cache
           const timestamp = new Date().getTime();
           const url = `${SHEET_URL}&_=${timestamp}`;
@@ -576,14 +594,25 @@
           
           if (parsedData.length > 0) {
             dataSiswa = parsedData;
+            dataLoaded = true;
+            
+            // Tampilkan informasi bahwa data berhasil dimuat
+            dataInfo.textContent = `Data kelulusan berhasil dimuat (${dataSiswa.length} data)`;
+            setTimeout(() => {
+              dataInfo.style.display = 'none';
+            }, 3000);
+            
+            // Buat elemen slideshow dari data Google Sheets
             createSlideshowItems();
             return true;
           } else {
             throw new Error('Tidak ada data yang ditemukan setelah parsing');
           }
         } catch (error) {
+          console.error('Error saat mengambil data:', error);
           errorMessage.textContent = 'Terjadi kesalahan saat memuat data. Silakan coba lagi nanti.';
           errorMessage.style.display = 'block';
+          dataInfo.style.display = 'none';
           return false;
         }
       }
@@ -608,6 +637,9 @@
           
           // Parse header dengan benar, menangani tanda kutip
           const headers = parseCSVLine(headerLine);
+          
+          // Log header untuk debugging
+          console.log('Headers:', headers);
           
           // Buat array untuk menyimpan hasil
           const result = [];
@@ -648,12 +680,25 @@
             }
           }
           
+          // Log indeks kolom untuk debugging
+          console.log('Indeks kolom:');
+          console.log('No Pendaftaran:', indexNoPendaftaran);
+          console.log('Nama:', indexNama);
+          console.log('TTL:', indexTTL);
+          console.log('Asal Sekolah:', indexAsalSekolah);
+          console.log('Jalur:', indexJalur);
+          console.log('Nama Ayah:', indexNamaAyah);
+          console.log('Status:', indexStatus);
+          console.log('Kolom Urutan:', indexKolomUrutan);
+          console.log('Nomor Urutan:', indexNomorUrutan);
+          
           // Jika tidak menemukan kolom nomor pendaftaran, coba cari dengan nama lain
           if (indexNoPendaftaran === -1) {
             for (let i = 0; i < headers.length; i++) {
               const header = headers[i].toLowerCase().trim();
               if (header.includes('id') || header.includes('no') || header.includes('nomor')) {
                 indexNoPendaftaran = i;
+                console.log('Menggunakan kolom alternatif untuk No Pendaftaran:', headers[i]);
                 break;
               }
             }
@@ -666,6 +711,11 @@
             try {
               // Parse baris data dengan benar, menangani tanda kutip
               const values = parseCSVLine(lines[i]);
+              
+              // Log baris data untuk debugging
+              if (i < 3) {
+                console.log(`Baris ${i}:`, values);
+              }
               
               // Buat objek siswa
               const siswa = {};
@@ -733,13 +783,21 @@
               // Tambahkan ke hasil
               result.push(siswa);
             } catch (lineError) {
+              console.error(`Error saat memproses baris ${i}:`, lineError);
               // Lanjutkan ke baris berikutnya jika ada error
               continue;
             }
           }
           
+          // Log beberapa data pertama untuk debugging
+          console.log('Sampel data:');
+          for (let i = 0; i < Math.min(3, result.length); i++) {
+            console.log(`Data ${i + 1}:`, result[i]);
+          }
+          
           return result;
         } catch (error) {
+          console.error('Error parsing CSV:', error);
           return [];
         }
       }
@@ -790,6 +848,15 @@
         
         // Bersihkan nomor pendaftaran dari spasi dan ubah ke huruf kecil
         const cleanNoPendaftaran = noPendaftaran.trim();
+        console.log('Mencari nomor pendaftaran:', cleanNoPendaftaran);
+        
+        // Log semua nomor pendaftaran yang ada untuk debugging
+        console.log('Daftar nomor pendaftaran yang tersedia:');
+        dataSiswa.slice(0, 10).forEach((siswa, index) => {
+          if (siswa.noPendaftaran) {
+            console.log(`${index + 1}. ${siswa.noPendaftaran}`);
+          }
+        });
         
         // 1. Coba pencarian eksak (case sensitive)
         for (const siswa of dataSiswa) {
@@ -797,6 +864,7 @@
           
           const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim();
           if (siswaNoPendaftaran === cleanNoPendaftaran) {
+            console.log('Siswa ditemukan dengan kecocokan eksak (case sensitive):', siswa);
             return siswa;
           }
         }
@@ -807,12 +875,14 @@
           
           const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
           if (siswaNoPendaftaran === cleanNoPendaftaran.toLowerCase()) {
+            console.log('Siswa ditemukan dengan kecocokan eksak (case insensitive):', siswa);
             return siswa;
           }
         }
         
         // 3. Coba pencarian dengan normalisasi (hapus semua karakter non-alfanumerik)
         const normalizedInput = cleanNoPendaftaran.replace(/[^a-zA-Z0-9]/g, '');
+        console.log('Nomor pendaftaran yang dinormalisasi:', normalizedInput);
         
         for (const siswa of dataSiswa) {
           if (!siswa.noPendaftaran) continue;
@@ -821,6 +891,7 @@
           const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-zA-Z0-9]/g, '');
           
           if (normalizedSiswa === normalizedInput) {
+            console.log('Siswa ditemukan dengan kecocokan normalisasi:', siswa);
             return siswa;
           }
         }
@@ -833,10 +904,12 @@
           
           if (siswaNoPendaftaran.includes(cleanNoPendaftaran.toLowerCase()) || 
               cleanNoPendaftaran.toLowerCase().includes(siswaNoPendaftaran)) {
+            console.log('Siswa ditemukan dengan kecocokan substring:', siswa);
             return siswa;
           }
         }
         
+        console.log('Siswa tidak ditemukan dengan semua metode pencarian');
         return null;
       }
       
@@ -958,30 +1031,42 @@
       // Fungsi untuk memeriksa status kelulusan berdasarkan kombinasi kolom
       function isLulus(siswa) {
         if (!siswa) {
+          console.log('Data siswa tidak valid');
           return false;
         }
         
+        // Log data untuk debugging
+        console.log('Memeriksa status kelulusan untuk:', siswa);
+        console.log('Status:', siswa.status);
+        console.log('Kolom Urutan:', siswa.kolomUrutan);
+        console.log('Nomor Urutan:', siswa.nomorUrutan);
+        
         // Jika status tidak terisi, jangan tampilkan apapun
         if (!siswa.status && !siswa.kolomUrutan && !siswa.nomorUrutan) {
+          console.log('Tidak ada data status kelulusan');
           return null;
         }
         
         // Jika kolomUrutan dan nomorUrutan keduanya terisi, siswa LULUS
         if (siswa.kolomUrutan && siswa.nomorUrutan) {
+          console.log('Kolom Urutan dan Nomor Urutan terisi, siswa LULUS');
           return true;
         }
         
         // Jika status secara eksplisit disetel ke "LULUS", maka LULUS
         if (siswa.status && siswa.status.toUpperCase().includes("LULUS") && !siswa.status.toUpperCase().includes("TIDAK")) {
+          console.log('Status secara eksplisit disetel ke LULUS');
           return true;
         }
         
         // Jika status secara eksplisit disetel ke "TIDAK LULUS", maka TIDAK LULUS
         if (siswa.status && (siswa.status.toUpperCase().includes("TIDAK LULUS") || siswa.status.toUpperCase().includes("GAGAL"))) {
+          console.log('Status secara eksplisit disetel ke TIDAK LULUS');
           return false;
         }
         
         // Default: TIDAK LULUS
+        console.log('Default: TIDAK LULUS');
         return false;
       }
       
@@ -990,9 +1075,11 @@
       
       cekButton.addEventListener('click', async function() {
         const noPendaftaran = noPendaftaranInput.value.trim();
+        console.log('Tombol cek diklik, nomor pendaftaran:', noPendaftaran);
         
         if (!noPendaftaran) {
           alert('Silakan masukkan nomor pendaftaran Anda!');
+          console.log('Nomor pendaftaran kosong');
           return;
         }
         
@@ -1000,9 +1087,11 @@
         errorMessage.style.display = 'none';
         
         // Jika data belum diambil, coba ambil lagi
-        if (dataSiswa.length === 0) {
+        if (!dataLoaded || dataSiswa.length === 0) {
+          console.log('Data siswa kosong, mencoba mengambil data');
           const success = await fetchData();
           if (!success) {
+            console.log('Gagal mengambil data');
             return;
           }
         }
@@ -1014,12 +1103,14 @@
           errorMessage.textContent = 'Nomor pendaftaran tidak ditemukan!';
           errorMessage.style.display = 'block';
           resultContainer.style.display = 'none';
+          console.log('Nomor pendaftaran tidak ditemukan:', noPendaftaran);
           return;
         }
         
         // Tampilkan loading
         loadingOverlay.style.display = 'flex';
         loadingText.textContent = 'Memproses data...';
+        console.log('Menampilkan loading overlay');
         
         // Mulai slideshow
         startSlideshow();
@@ -1031,20 +1122,26 @@
           
           // Sembunyikan loading overlay
           loadingOverlay.style.display = 'none';
+          console.log('Loading selesai, menyembunyikan overlay');
           
           // Periksa status kelulusan
           const statusLulus = isLulus(siswa);
+          console.log('Hasil pemeriksaan status:', statusLulus);
           
           // Jika status null (tidak ada data status), jangan tampilkan apapun
           if (statusLulus === null) {
             errorMessage.textContent = 'Data status kelulusan belum tersedia!';
             errorMessage.style.display = 'block';
             resultContainer.style.display = 'none';
+            console.log('Data status kelulusan tidak tersedia');
             return;
           }
           
           // Tampilkan hasil
           resultContainer.style.display = 'block';
+          
+          // Log semua data siswa untuk debugging
+          console.log('Data siswa yang akan ditampilkan:', siswa);
           
           // Isi data
           nama.textContent = siswa.nama || "-";
@@ -1054,6 +1151,7 @@
           namaAyah.textContent = siswa.namaAyah || "-";
           
           if (statusLulus) {
+            console.log('Siswa LULUS');
             statusContainer.className = "status-container lulus";
             statusKelulusan.textContent = "LULUS";
             statusKelulusan.className = "status lulus";
@@ -1061,6 +1159,7 @@
             keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${siswa.kolomUrutan || "-"}</span> urutan <span class="highlight">${siswa.nomorUrutan || "-"}</span> pada lembar pengumuman.`;
             contactInfo.style.display = 'block';
           } else {
+            console.log('Siswa TIDAK LULUS');
             statusContainer.className = "status-container tidak-lulus";
             statusKelulusan.textContent = "MOHON MAAF";
             statusKelulusan.className = "status tidak-lulus";
@@ -1089,5 +1188,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5f10db5f6fd02',t:'MTc0OTE5MjI3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b611dc7181fd97',t:'MTc0OTE5MzYxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

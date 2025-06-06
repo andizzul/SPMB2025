@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -651,63 +649,123 @@
           // Buat array untuk menyimpan hasil
           const result = [];
           
+          // Identifikasi indeks kolom yang penting
+          let indexNoPendaftaran = -1;
+          let indexNama = -1;
+          let indexTTL = -1;
+          let indexAsalSekolah = -1;
+          let indexJalur = -1;
+          let indexNamaAyah = -1;
+          let indexStatus = -1;
+          let indexKolomUrutan = -1;
+          let indexNomorUrutan = -1;
+          
+          // Cari indeks kolom berdasarkan nama header
+          for (let i = 0; i < headers.length; i++) {
+            const header = headers[i].toLowerCase().trim();
+            
+            if (header.includes('pendaftaran') || header.includes('nodaftar') || header.includes('no.') || header.includes('nomor')) {
+              indexNoPendaftaran = i;
+            } else if (header.includes('nama') && !header.includes('ayah') && !header.includes('ibu') && !header.includes('orang tua')) {
+              indexNama = i;
+            } else if (header.includes('ttl') || header.includes('lahir')) {
+              indexTTL = i;
+            } else if (header.includes('asal') || header.includes('sekolah')) {
+              indexAsalSekolah = i;
+            } else if (header.includes('jalur') || header.includes('seleksi')) {
+              indexJalur = i;
+            } else if (header.includes('ayah') || header.includes('orang tua')) {
+              indexNamaAyah = i;
+            } else if (header.includes('status') || header.includes('kelulusan') || header.includes('hasil')) {
+              indexStatus = i;
+            } else if (header.includes('kolom') || header.includes('urutan kolom')) {
+              indexKolomUrutan = i;
+            } else if (header.includes('nomor urut') || header.includes('urutan')) {
+              indexNomorUrutan = i;
+            }
+          }
+          
+          console.log('Indeks kolom yang ditemukan:');
+          console.log('No Pendaftaran:', indexNoPendaftaran);
+          console.log('Nama:', indexNama);
+          console.log('TTL:', indexTTL);
+          console.log('Asal Sekolah:', indexAsalSekolah);
+          console.log('Jalur:', indexJalur);
+          console.log('Nama Ayah:', indexNamaAyah);
+          console.log('Status:', indexStatus);
+          console.log('Kolom Urutan:', indexKolomUrutan);
+          console.log('Nomor Urutan:', indexNomorUrutan);
+          
           // Proses setiap baris data
           for (let i = 1; i < lines.length; i++) {
             if (!lines[i].trim()) continue;
             
             // Parse baris data dengan benar, menangani tanda kutip
             const values = parseCSVLine(lines[i]);
-            console.log(`Baris ${i} values:`, values);
             
-            // Buat objek dengan nama kolom yang tepat
-            const entry = {};
+            // Buat objek siswa
+            const siswa = {};
             
-            // Isi data berdasarkan posisi kolom
-            for (let j = 0; j < headers.length && j < values.length; j++) {
-              const header = headers[j].trim();
-              const value = values[j].trim();
-              
-              // Coba deteksi kolom berdasarkan nama header
-              if (header.toLowerCase().includes('pendaftaran') || header.toLowerCase().includes('nodaftar')) {
-                entry.noPendaftaran = value;
-              } else if (header.toLowerCase().includes('nama') && !header.toLowerCase().includes('ayah') && !header.toLowerCase().includes('orang tua')) {
-                entry.nama = value;
-              } else if (header.toLowerCase().includes('ttl') || header.toLowerCase().includes('lahir')) {
-                entry.ttl = value;
-              } else if (header.toLowerCase().includes('asal') || header.toLowerCase().includes('sekolah')) {
-                entry.asalSekolah = value;
-              } else if (header.toLowerCase().includes('jalur')) {
-                entry.jalur = value;
-              } else if (header.toLowerCase().includes('ayah') || header.toLowerCase().includes('orang tua')) {
-                entry.namaAyah = value;
-              } else if (header.toLowerCase().includes('status') || header.toLowerCase().includes('kelulusan')) {
-                entry.status = value;
-              } else if (header.toLowerCase().includes('kolom')) {
-                entry.kolomUrutan = value;
-              } else if (header.toLowerCase().includes('urutan') || header.toLowerCase().includes('nomor urut')) {
-                entry.nomorUrutan = value;
-              } else {
-                // Jika tidak ada yang cocok, gunakan nama header asli
-                entry[header] = value;
-              }
+            // Isi data berdasarkan indeks kolom yang ditemukan
+            if (indexNoPendaftaran >= 0 && indexNoPendaftaran < values.length) {
+              siswa.noPendaftaran = values[indexNoPendaftaran].trim();
+            } else {
+              siswa.noPendaftaran = '';
             }
             
-            // Pastikan semua properti yang diperlukan ada
-            entry.noPendaftaran = entry.noPendaftaran || '';
-            entry.nama = entry.nama || '';
-            entry.ttl = entry.ttl || '';
-            entry.asalSekolah = entry.asalSekolah || '';
-            entry.jalur = entry.jalur || '';
-            entry.namaAyah = entry.namaAyah || '';
-            entry.status = entry.status || '';
-            entry.kolomUrutan = entry.kolomUrutan || '';
-            entry.nomorUrutan = entry.nomorUrutan || '';
+            if (indexNama >= 0 && indexNama < values.length) {
+              siswa.nama = values[indexNama].trim();
+            } else {
+              siswa.nama = '';
+            }
             
-            // Tambahkan entri ke hasil
-            result.push(entry);
+            if (indexTTL >= 0 && indexTTL < values.length) {
+              siswa.ttl = values[indexTTL].trim();
+            } else {
+              siswa.ttl = '';
+            }
             
-            // Log untuk debugging
-            console.log(`Entri ${i}:`, entry);
+            if (indexAsalSekolah >= 0 && indexAsalSekolah < values.length) {
+              siswa.asalSekolah = values[indexAsalSekolah].trim();
+            } else {
+              siswa.asalSekolah = '';
+            }
+            
+            if (indexJalur >= 0 && indexJalur < values.length) {
+              siswa.jalur = values[indexJalur].trim();
+            } else {
+              siswa.jalur = '';
+            }
+            
+            if (indexNamaAyah >= 0 && indexNamaAyah < values.length) {
+              siswa.namaAyah = values[indexNamaAyah].trim();
+            } else {
+              siswa.namaAyah = '';
+            }
+            
+            if (indexStatus >= 0 && indexStatus < values.length) {
+              siswa.status = values[indexStatus].trim();
+            } else {
+              siswa.status = '';
+            }
+            
+            if (indexKolomUrutan >= 0 && indexKolomUrutan < values.length) {
+              siswa.kolomUrutan = values[indexKolomUrutan].trim();
+            } else {
+              siswa.kolomUrutan = '';
+            }
+            
+            if (indexNomorUrutan >= 0 && indexNomorUrutan < values.length) {
+              siswa.nomorUrutan = values[indexNomorUrutan].trim();
+            } else {
+              siswa.nomorUrutan = '';
+            }
+            
+            // Log data siswa untuk debugging
+            console.log(`Siswa ${i}:`, siswa);
+            
+            // Tambahkan ke hasil
+            result.push(siswa);
           }
           
           console.log(`Parsing selesai, ${result.length} entri data`);
@@ -924,14 +982,38 @@
         
         // Konversi ke string dan bersihkan
         const statusStr = String(status).trim().toLowerCase();
-        console.log('Status original', statusStr);
+        console.log('Status original:', statusStr);
         
         if (statusStr === '') {
           console.log('Status kosong');
           return false;
         }
         
-        // Periksa berbagai kemungkinan format "LULUS"
+        // Pola untuk status TIDAK LULUS
+        const tidakLulusPatterns = [
+          'tidak lulus',
+          'tidak',
+          'tdk lulus',
+          'tdk',
+          'gagal',
+          'ditolak',
+          'no',
+          'tidak lolos',
+          'tidak diterima',
+          '0',
+          '0.0',
+          'false'
+        ];
+        
+        // Periksa apakah status cocok dengan salah satu pola "TIDAK LULUS"
+        for (const pattern of tidakLulusPatterns) {
+          if (statusStr === pattern || statusStr.includes(pattern)) {
+            console.log(`Status cocok dengan pola TIDAK LULUS "${pattern}"`);
+            return false;
+          }
+        }
+        
+        // Pola untuk status LULUS
         const lulusPatterns = [
           'lulus', 
           'l u l u s', 
@@ -940,24 +1022,22 @@
           'ya', 
           'yes',
           'lolos',
-          'diterima'
+          'diterima',
+          '1',
+          '1.0',
+          'true'
         ];
         
         // Periksa apakah status cocok dengan salah satu pola "LULUS"
         for (const pattern of lulusPatterns) {
           if (statusStr === pattern || statusStr.includes(pattern)) {
-            console.log(`Status cocok dengan pola "${pattern}"`);
+            console.log(`Status cocok dengan pola LULUS "${pattern}"`);
             return true;
           }
         }
         
-        // Periksa jika status adalah angka 1 (sering digunakan untuk menandakan lulus)
-        if (statusStr === '1' || statusStr === '1.0') {
-          console.log('Status adalah angka 1, dianggap LULUS');
-          return true;
-        }
-        
-        console.log('Status tidak cocok dengan pola LULUS manapun');
+        // Jika tidak ada pola yang cocok, anggap TIDAK LULUS sebagai default yang aman
+        console.log('Status tidak cocok dengan pola manapun, default ke TIDAK LULUS');
         return false;
       }
       
@@ -1034,11 +1114,11 @@
           namaAyah.textContent = siswa.namaAyah || "-";
           
           // Tampilkan status siswa di konsol untuk debugging
-          console.log('Status siswa', siswa.status);
+          console.log('Status siswa:', siswa.status);
           
           // Periksa status kelulusan dengan fungsi yang lebih baik
           const statusLulus = isLulus(siswa.status);
-          console.log('Hasil pemeriksaan status', statusLulus);
+          console.log('Hasil pemeriksaan status:', statusLulus);
           
           if (statusLulus) {
             console.log('Siswa LULUS');
@@ -1080,5 +1160,5 @@
       console.log('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b554919454fd3e',t:'MTc0OTE4NTg2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5673ff6596061',t:'MTc0OTE4NjYyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

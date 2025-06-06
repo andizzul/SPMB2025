@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -761,6 +763,12 @@
               siswa.nomorUrutan = '';
             }
             
+            // Jika status kosong, lewati data ini
+            if (!siswa.status) {
+              console.log(`Siswa ${i} dilewati karena status kosong:`, siswa);
+              continue;
+            }
+            
             // Log data siswa untuk debugging
             console.log(`Siswa ${i}:`, siswa);
             
@@ -768,7 +776,7 @@
             result.push(siswa);
           }
           
-          console.log(`Parsing selesai, ${result.length} entri data`);
+          console.log(`Parsing selesai, ${result.length} entri data valid`);
           return result;
         } catch (error) {
           console.error('Error parsing CSV:', error);
@@ -973,71 +981,67 @@
         });
       }
       
-      // Fungsi untuk memeriksa status kelulusan dengan lebih baik
-      function isLulus(status) {
-        if (status === undefined || status === null) {
-          console.log('Status undefined atau null');
+      // Fungsi untuk memeriksa status kelulusan berdasarkan kombinasi kolom
+      function isLulus(siswa) {
+        if (!siswa) {
+          console.log('Data siswa tidak valid');
           return false;
         }
         
-        // Konversi ke string dan bersihkan
-        const statusStr = String(status).trim().toLowerCase();
-        console.log('Status original:', statusStr);
+        // Log data untuk debugging
+        console.log('Memeriksa status kelulusan untuk:', siswa);
+        console.log('Status:', siswa.status);
+        console.log('Kolom Urutan:', siswa.kolomUrutan);
+        console.log('Nomor Urutan:', siswa.nomorUrutan);
         
-        if (statusStr === '') {
-          console.log('Status kosong');
+        // Jika kolom status kosong, anggap tidak lulus
+        if (!siswa.status) {
+          console.log('Status kosong, dianggap TIDAK LULUS');
           return false;
         }
         
-        // Pola untuk status TIDAK LULUS
-        const tidakLulusPatterns = [
-          'tidak lulus',
-          'tidak',
-          'tdk lulus',
-          'tdk',
-          'gagal',
-          'ditolak',
-          'no',
-          'tidak lolos',
-          'tidak diterima',
-          '0',
-          '0.0',
-          'false'
-        ];
-        
-        // Periksa apakah status cocok dengan salah satu pola "TIDAK LULUS"
-        for (const pattern of tidakLulusPatterns) {
-          if (statusStr === pattern || statusStr.includes(pattern)) {
-            console.log(`Status cocok dengan pola TIDAK LULUS "${pattern}"`);
-            return false;
-          }
+        // Jika kolomUrutan dan nomorUrutan keduanya terisi, siswa LULUS
+        if (siswa.kolomUrutan && siswa.nomorUrutan) {
+          console.log('Kolom Urutan dan Nomor Urutan terisi, siswa LULUS');
+          return true;
         }
         
-        // Pola untuk status LULUS
-        const lulusPatterns = [
-          'lulus', 
-          'l u l u s', 
-          'l.u.l.u.s', 
-          'l-u-l-u-s',
-          'ya', 
-          'yes',
-          'lolos',
-          'diterima',
-          '1',
-          '1.0',
-          'true'
-        ];
-        
-        // Periksa apakah status cocok dengan salah satu pola "LULUS"
-        for (const pattern of lulusPatterns) {
-          if (statusStr === pattern || statusStr.includes(pattern)) {
-            console.log(`Status cocok dengan pola LULUS "${pattern}"`);
-            return true;
+        // Jika kolomUrutan atau nomorUrutan kosong, periksa status
+        if (!siswa.kolomUrutan || !siswa.nomorUrutan) {
+          console.log('Kolom Urutan atau Nomor Urutan kosong, memeriksa status');
+          
+          // Konversi status ke string dan bersihkan
+          const statusStr = String(siswa.status).trim().toLowerCase();
+          
+          // Pola untuk status LULUS
+          const lulusPatterns = [
+            'lulus', 
+            'l u l u s', 
+            'l.u.l.u.s', 
+            'l-u-l-u-s',
+            'ya', 
+            'yes',
+            'lolos',
+            'diterima',
+            '1',
+            '1.0',
+            'true'
+          ];
+          
+          // Periksa apakah status cocok dengan salah satu pola "LULUS"
+          for (const pattern of lulusPatterns) {
+            if (statusStr === pattern || statusStr.includes(pattern)) {
+              console.log(`Status cocok dengan pola LULUS "${pattern}", tetapi data urutan tidak lengkap, dianggap TIDAK LULUS`);
+              return false; // Meskipun status LULUS, jika data urutan tidak lengkap, dianggap TIDAK LULUS
+            }
           }
+          
+          console.log('Status tidak cocok dengan pola LULUS, dianggap TIDAK LULUS');
+          return false;
         }
         
-        // Jika tidak ada pola yang cocok, anggap TIDAK LULUS sebagai default yang aman
-        console.log('Status tidak cocok dengan pola manapun, default ke TIDAK LULUS');
+        // Default: jika tidak ada kondisi yang terpenuhi, anggap TIDAK LULUS
+        console.log('Tidak ada kondisi yang terpenuhi, default ke TIDAK LULUS');
         return false;
       }
       
@@ -1113,11 +1117,8 @@
           jalur.textContent = siswa.jalur || "-";
           namaAyah.textContent = siswa.namaAyah || "-";
           
-          // Tampilkan status siswa di konsol untuk debugging
-          console.log('Status siswa:', siswa.status);
-          
           // Periksa status kelulusan dengan fungsi yang lebih baik
-          const statusLulus = isLulus(siswa.status);
+          const statusLulus = isLulus(siswa);
           console.log('Hasil pemeriksaan status:', statusLulus);
           
           if (statusLulus) {
@@ -1160,5 +1161,5 @@
       console.log('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5673ff6596061',t:'MTc0OTE4NjYyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5877f71fb5fa8',t:'MTc0OTE4Nzk0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

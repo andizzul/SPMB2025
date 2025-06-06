@@ -499,7 +499,7 @@
       <div class="school-info">
         <p>email : smpn01_bulukumba@yahoo.co.id</p>
       </div>
-      <p class="contact-info" id="contactInfo">Narahubung: Andizzul – 085299613808</p>
+      <p class="contact-info" id="contactInfo">Narahubung : Andizzul – 085299613808</p>
     </div>
   </div>
   
@@ -615,30 +615,43 @@
           const headers = parseCSVLine(headerLine);
           console.log('Headers yang diekstrak', headers);
           
-          // Verifikasi header yang diharapkan
-          const expectedHeaders = ['noPendaftaran', 'nama', 'ttl', 'asalSekolah', 'jalur', 'namaAyah', 'status', 'kolomUrutan', 'nomorUrutan'];
-          const missingHeaders = expectedHeaders.filter(header => !headers.includes(header));
+          // Definisikan pemetaan header yang diharapkan
+          const headerMap = {};
+          
+          // Cari indeks untuk setiap header yang diharapkan
+          for (let i = 0; i < headers.length; i++) {
+            const header = headers[i].toLowerCase().trim();
+            
+            if (header.includes('pendaftaran') || header.includes('nodaftar') || header.includes('no.') || header.includes('nomor')) {
+              headerMap.noPendaftaran = i;
+            } else if (header.includes('nama') && !header.includes('ayah') && !header.includes('ibu')) {
+              headerMap.nama = i;
+            } else if (header.includes('ttl') || header.includes('lahir')) {
+              headerMap.ttl = i;
+            } else if (header.includes('asal') || header.includes('sekolah')) {
+              headerMap.asalSekolah = i;
+            } else if (header.includes('jalur') || header.includes('seleksi')) {
+              headerMap.jalur = i;
+            } else if (header.includes('ayah') || header.includes('orang tua')) {
+              headerMap.namaAyah = i;
+            } else if (header.includes('status') || header.includes('kelulusan') || header.includes('hasil')) {
+              headerMap.status = i;
+            } else if (header.includes('kolom') || header.includes('urutan kolom')) {
+              headerMap.kolomUrutan = i;
+            } else if (header.includes('nomor urut') || header.includes('urutan')) {
+              headerMap.nomorUrutan = i;
+            }
+          }
+          
+          console.log('Pemetaan header:', headerMap);
+          
+          // Periksa apakah semua header yang diperlukan ditemukan
+          const requiredHeaders = ['noPendaftaran', 'nama', 'status'];
+          const missingHeaders = requiredHeaders.filter(header => headerMap[header] === undefined);
           
           if (missingHeaders.length > 0) {
-            console.log('Header yang diharapkan tidak ditemukan', missingHeaders);
-            // Coba deteksi header yang mungkin mengandung teks tambahan
-            const headerMap = {};
-            headers.forEach((header, index) => {
-              // Cari header yang mungkin mengandung teks yang diharapkan
-              for (const expected of expectedHeaders) {
-                if (header.includes(expected)) {
-                  headerMap[expected] = index;
-                  console.log(`Memetakan ${expected} ke ${header} pada indeks ${index}`);
-                  break;
-                }
-              }
-            });
-            
-            // Jika tidak semua header dipetakan, kembalikan array kosong
-            if (Object.keys(headerMap).length < expectedHeaders.length) {
-              console.log('Tidak semua header dapat dipetakan, mengembalikan array kosong');
-              return [];
-            }
+            console.error('Header yang diperlukan tidak ditemukan:', missingHeaders);
+            return [];
           }
           
           const result = [];
@@ -649,19 +662,23 @@
             
             // Parse baris data dengan benar, menangani tanda kutip
             const values = parseCSVLine(lines[i]);
-            console.log(`Baris ${i} values`, values);
             
-            // Buat objek dengan nama kolom yang tepat
-            const entry = {};
-            for (let j = 0; j < headers.length; j++) {
-              const header = headers[j];
-              // Cari header yang sesuai dengan yang diharapkan
-              const expectedHeader = expectedHeaders.find(expected => header.includes(expected));
-              const finalHeader = expectedHeader || header;
-              entry[finalHeader] = j < values.length ? values[j] : '';
+            // Buat objek siswa dengan pemetaan yang benar
+            const siswa = {};
+            
+            // Isi data siswa berdasarkan pemetaan header
+            for (const [key, index] of Object.entries(headerMap)) {
+              if (index !== undefined && index < values.length) {
+                siswa[key] = values[index];
+              } else {
+                siswa[key] = '';
+              }
             }
             
-            result.push(entry);
+            // Log data siswa untuk debugging
+            console.log(`Siswa ${i}:`, siswa);
+            
+            result.push(siswa);
           }
           
           console.log(`Parsing selesai, ${result.length} entri data`);
@@ -733,7 +750,6 @@
           
           // Bersihkan nomor pendaftaran siswa dari spasi dan ubah ke huruf kecil
           const cleanSiswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
-          console.log('Membandingkan dengan', cleanSiswaNoPendaftaran);
           
           // Periksa kecocokan
           if (cleanSiswaNoPendaftaran === cleanNoPendaftaran) {
@@ -872,7 +888,7 @@
         }
         
         // Konversi ke string dan bersihkan
-        const statusStr = String(status).trim();
+        const statusStr = String(status).trim().toLowerCase();
         console.log('Status original', statusStr);
         
         if (statusStr === '') {
@@ -880,25 +896,34 @@
           return false;
         }
         
-        // Bersihkan string dari spasi berlebih dan ubah ke huruf kecil
-        const cleanStatus = statusStr.toLowerCase();
-        console.log('Status yang dibersihkan', cleanStatus);
-        
         // Periksa berbagai kemungkinan format "LULUS"
-        const isMatch = 
-          cleanStatus === "lulus" || 
-          cleanStatus.includes("lulus") ||
-          cleanStatus === "l u l u s" || 
-          cleanStatus === "l.u.l.u.s" || 
-          cleanStatus === "l-u-l-u-s" ||
-          cleanStatus === "1" ||  // Jika menggunakan angka 1 untuk lulus
-          cleanStatus === "ya" || 
-          cleanStatus === "yes" ||
-          cleanStatus === "lolos" ||
-          cleanStatus === "diterima";
+        const lulusPatterns = [
+          'lulus', 
+          'l u l u s', 
+          'l.u.l.u.s', 
+          'l-u-l-u-s',
+          'ya', 
+          'yes',
+          'lolos',
+          'diterima'
+        ];
         
-        console.log(`Hasil pemeriksaan isLulus: ${isMatch}`);
-        return isMatch;
+        // Periksa apakah status cocok dengan salah satu pola "LULUS"
+        for (const pattern of lulusPatterns) {
+          if (statusStr === pattern || statusStr.includes(pattern)) {
+            console.log(`Status cocok dengan pola "${pattern}"`);
+            return true;
+          }
+        }
+        
+        // Periksa jika status adalah angka 1 (sering digunakan untuk menandakan lulus)
+        if (statusStr === '1' || statusStr === '1.0') {
+          console.log('Status adalah angka 1, dianggap LULUS');
+          return true;
+        }
+        
+        console.log('Status tidak cocok dengan pola LULUS manapun');
+        return false;
       }
       
       // Ambil data saat halaman dimuat
@@ -1020,5 +1045,5 @@
       console.log('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5242110f340c2',t:'MTc0OTE4Mzg3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b53740311e9d17',t:'MTc0OTE4NDY2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

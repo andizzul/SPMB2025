@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -278,7 +280,7 @@
     .school-info {
       margin-top: 4px; /* Jarak diperkecil */
       font-weight: 500;
-      color: var(--primary); /* Warna sama dengan judul */
+      color: var(--text-light); /* Warna sama dengan tulisan di atasnya */
       text-align: center;
       line-height: 1.4; /* Line height diperkecil */
     }
@@ -361,17 +363,6 @@
       margin-top: 10px;
       text-align: center;
       font-weight: 500;
-      display: none;
-    }
-    
-    .debug-panel {
-      background-color: #f8f9fa;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 10px;
-      margin-top: 20px;
-      font-family: monospace;
-      font-size: 12px;
       display: none;
     }
     
@@ -506,12 +497,10 @@
     <div class="footer">
       <p>SPMB SMP Negeri 1 Bulukumba Tahun Ajaran 2025/2026</p>
       <div class="school-info">
-        <p>email – smpn01_bulukumba@yahoo.co.id</p>
+        <p>email : smpn01_bulukumba@yahoo.co.id</p>
       </div>
       <p class="contact-info" id="contactInfo">Narahubung: Andizzul – 085299613808</p>
     </div>
-    
-    <div class="debug-panel" id="debugPanel"></div>
   </div>
   
   <div class="overlay" id="loadingOverlay">
@@ -528,9 +517,6 @@
     const SHEET_ID = '1_ldkkmwrLwZhw8UK0dWu3JZjBCe3vY6WGK_Dnhe3ghY'; // Ganti dengan ID spreadsheet Anda
     const SHEET_NAME = 'data_siswa'; // Ganti dengan nama sheet Anda
     const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
-    
-    // Mode debugging (ubah ke true untuk mengaktifkan)
-    const DEBUG_MODE = true;
     
     // Variabel untuk menyimpan data siswa
     let dataSiswa = [];
@@ -553,49 +539,21 @@
       const contactInfo = document.getElementById('contactInfo');
       const errorMessage = document.getElementById('errorMessage');
       const slideshowContainer = document.getElementById('slideshowContainer');
-      const debugPanel = document.getElementById('debugPanel');
       
-      // Aktifkan panel debugging jika mode debug aktif
-      if (DEBUG_MODE) {
-        debugPanel.style.display = 'block';
-      }
-      
-      // Fungsi untuk menambahkan log ke panel debugging
-      function debugLog(message, data = null) {
-        if (!DEBUG_MODE) return;
-        
-        const timestamp = new Date().toLocaleTimeString();
-        let logMessage = `[${timestamp}] ${message}`;
-        
-        if (data) {
-          if (typeof data === 'object') {
-            logMessage += `: ${JSON.stringify(data)}`;
-          } else {
-            logMessage += `: ${data}`;
-          }
-        }
-        
-        const logElement = document.createElement('div');
-        logElement.textContent = logMessage;
-        debugPanel.appendChild(logElement);
-        
-        // Scroll ke bawah
-        debugPanel.scrollTop = debugPanel.scrollHeight;
-        
-        // Juga log ke konsol
-        console.log(message, data || '');
-      }
+      // Variabel untuk slideshow
+      let slideshowInterval = null;
+      let slideIndex = 0;
       
       // Fungsi untuk mengambil data dari Google Sheets
       async function fetchData() {
         try {
-          debugLog('Memulai pengambilan data dari Google Sheets');
+          console.log('Memulai pengambilan data dari Google Sheets');
           
           // Tambahkan parameter waktu untuk menghindari cache
           const timestamp = new Date().getTime();
           const url = `${SHEET_URL}&_=${timestamp}`;
           
-          debugLog('Mengambil data dari URL', url);
+          console.log('Mengambil data dari URL', url);
           
           const response = await fetch(url);
           if (!response.ok) {
@@ -603,17 +561,17 @@
           }
           
           const csvData = await response.text();
-          debugLog('Data CSV diterima', csvData.substring(0, 100) + '...');
+          console.log('Data CSV diterima', csvData.substring(0, 100) + '...');
           
           // Gunakan fungsi parsing CSV yang lebih baik
           const parsedData = parseCSVImproved(csvData);
-          debugLog(`Parsing selesai, ${parsedData.length} baris data ditemukan`);
+          console.log(`Parsing selesai, ${parsedData.length} baris data ditemukan`);
           
           if (parsedData.length > 0) {
             dataSiswa = parsedData;
             
             // Tampilkan beberapa data pertama untuk debugging
-            debugLog('Sampel data pertama', dataSiswa[0]);
+            console.log('Sampel data pertama', dataSiswa[0]);
             
             // Buat elemen slideshow dari data Google Sheets
             createSlideshowItems();
@@ -622,7 +580,6 @@
             throw new Error('Tidak ada data yang ditemukan setelah parsing');
           }
         } catch (error) {
-          debugLog('Error saat mengambil data', error.message);
           console.error('Error:', error);
           errorMessage.textContent = 'Terjadi kesalahan saat memuat data. Silakan coba lagi nanti.';
           errorMessage.style.display = 'block';
@@ -632,38 +589,38 @@
       
       // Fungsi parsing CSV yang lebih baik dan lebih robust
       function parseCSVImproved(csvText) {
-        debugLog('Mulai parsing CSV');
+        console.log('Mulai parsing CSV');
         
         // Jika tidak ada data, kembalikan array kosong
         if (!csvText || csvText.trim() === '') {
-          debugLog('CSV kosong, mengembalikan array kosong');
+          console.log('CSV kosong, mengembalikan array kosong');
           return [];
         }
         
         try {
           // Split baris dengan mempertimbangkan berbagai jenis line break
           const lines = csvText.split(/\r\n|\n|\r/).filter(line => line.trim() !== '');
-          debugLog(`Jumlah baris: ${lines.length}`);
+          console.log(`Jumlah baris: ${lines.length}`);
           
           if (lines.length <= 1) {
-            debugLog('Tidak cukup baris data, mengembalikan array kosong');
+            console.log('Tidak cukup baris data, mengembalikan array kosong');
             return [];
           }
           
           // Ekstrak header (baris pertama)
           const headerLine = lines[0];
-          debugLog('Header line', headerLine);
+          console.log('Header line', headerLine);
           
           // Parse header dengan benar, menangani tanda kutip
           const headers = parseCSVLine(headerLine);
-          debugLog('Headers yang diekstrak', headers);
+          console.log('Headers yang diekstrak', headers);
           
           // Verifikasi header yang diharapkan
           const expectedHeaders = ['noPendaftaran', 'nama', 'ttl', 'asalSekolah', 'jalur', 'namaAyah', 'status', 'kolomUrutan', 'nomorUrutan'];
           const missingHeaders = expectedHeaders.filter(header => !headers.includes(header));
           
           if (missingHeaders.length > 0) {
-            debugLog('Header yang diharapkan tidak ditemukan', missingHeaders);
+            console.log('Header yang diharapkan tidak ditemukan', missingHeaders);
             // Coba deteksi header yang mungkin mengandung teks tambahan
             const headerMap = {};
             headers.forEach((header, index) => {
@@ -671,7 +628,7 @@
               for (const expected of expectedHeaders) {
                 if (header.includes(expected)) {
                   headerMap[expected] = index;
-                  debugLog(`Memetakan ${expected} ke ${header} pada indeks ${index}`);
+                  console.log(`Memetakan ${expected} ke ${header} pada indeks ${index}`);
                   break;
                 }
               }
@@ -679,7 +636,7 @@
             
             // Jika tidak semua header dipetakan, kembalikan array kosong
             if (Object.keys(headerMap).length < expectedHeaders.length) {
-              debugLog('Tidak semua header dapat dipetakan, mengembalikan array kosong');
+              console.log('Tidak semua header dapat dipetakan, mengembalikan array kosong');
               return [];
             }
           }
@@ -692,7 +649,7 @@
             
             // Parse baris data dengan benar, menangani tanda kutip
             const values = parseCSVLine(lines[i]);
-            debugLog(`Baris ${i} values`, values);
+            console.log(`Baris ${i} values`, values);
             
             // Buat objek dengan nama kolom yang tepat
             const entry = {};
@@ -707,10 +664,9 @@
             result.push(entry);
           }
           
-          debugLog(`Parsing selesai, ${result.length} entri data`);
+          console.log(`Parsing selesai, ${result.length} entri data`);
           return result;
         } catch (error) {
-          debugLog('Error saat parsing CSV', error.message);
           console.error('Error parsing CSV:', error);
           return [];
         }
@@ -757,13 +713,13 @@
       // Fungsi untuk mencari siswa dengan nomor pendaftaran (lebih fleksibel)
       function findSiswa(noPendaftaran) {
         if (!noPendaftaran || dataSiswa.length === 0) {
-          debugLog('Nomor pendaftaran kosong atau tidak ada data siswa');
+          console.log('Nomor pendaftaran kosong atau tidak ada data siswa');
           return null;
         }
         
         // Bersihkan nomor pendaftaran dari spasi dan ubah ke huruf kecil
         const cleanNoPendaftaran = noPendaftaran.trim().toLowerCase();
-        debugLog('Mencari nomor pendaftaran', cleanNoPendaftaran);
+        console.log('Mencari nomor pendaftaran', cleanNoPendaftaran);
         
         // Cari siswa dengan nomor pendaftaran yang cocok
         for (let i = 0; i < dataSiswa.length; i++) {
@@ -771,29 +727,29 @@
           
           // Periksa apakah siswa memiliki properti noPendaftaran
           if (!siswa.noPendaftaran) {
-            debugLog('Siswa tidak memiliki properti noPendaftaran', siswa);
+            console.log('Siswa tidak memiliki properti noPendaftaran', siswa);
             continue;
           }
           
           // Bersihkan nomor pendaftaran siswa dari spasi dan ubah ke huruf kecil
           const cleanSiswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
-          debugLog('Membandingkan dengan', cleanSiswaNoPendaftaran);
+          console.log('Membandingkan dengan', cleanSiswaNoPendaftaran);
           
           // Periksa kecocokan
           if (cleanSiswaNoPendaftaran === cleanNoPendaftaran) {
-            debugLog('Siswa ditemukan', siswa);
+            console.log('Siswa ditemukan', siswa);
             return siswa;
           }
         }
         
-        debugLog('Siswa tidak ditemukan');
+        console.log('Siswa tidak ditemukan');
         return null;
       }
       
       // Fungsi untuk membuat elemen slideshow dari data Google Sheets
       function createSlideshowItems() {
         slideshowContainer.innerHTML = '';
-        debugLog('Membuat elemen slideshow');
+        console.log('Membuat elemen slideshow');
         
         // Ambil maksimal 10 data untuk slideshow
         const slideshowData = dataSiswa.slice(0, 10);
@@ -815,13 +771,9 @@
           item.appendChild(schoolElement);
           slideshowContainer.appendChild(item);
           
-          debugLog(`Slideshow item ${index + 1} dibuat: ${siswa.nama}`);
+          console.log(`Slideshow item ${index + 1} dibuat: ${siswa.nama}`);
         });
       }
-      
-      // Variabel untuk slideshow
-      let slideshowInterval = null;
-      let slideIndex = 0;
       
       // Fungsi untuk slideshow
       function startSlideshow() {
@@ -829,6 +781,9 @@
         if (slideshowInterval) {
           clearInterval(slideshowInterval);
         }
+        
+        // Reset slideshow container untuk pencarian baru
+        createSlideshowItems();
         
         slideIndex = 0;
         const slideshowItems = document.querySelectorAll('.slideshow-item');
@@ -912,22 +867,22 @@
       // Fungsi untuk memeriksa status kelulusan dengan lebih baik
       function isLulus(status) {
         if (status === undefined || status === null) {
-          debugLog('Status undefined atau null');
+          console.log('Status undefined atau null');
           return false;
         }
         
         // Konversi ke string dan bersihkan
         const statusStr = String(status).trim();
-        debugLog('Status original', statusStr);
+        console.log('Status original', statusStr);
         
         if (statusStr === '') {
-          debugLog('Status kosong');
+          console.log('Status kosong');
           return false;
         }
         
         // Bersihkan string dari spasi berlebih dan ubah ke huruf kecil
         const cleanStatus = statusStr.toLowerCase();
-        debugLog('Status yang dibersihkan', cleanStatus);
+        console.log('Status yang dibersihkan', cleanStatus);
         
         // Periksa berbagai kemungkinan format "LULUS"
         const isMatch = 
@@ -942,31 +897,26 @@
           cleanStatus === "lolos" ||
           cleanStatus === "diterima";
         
-        debugLog(`Hasil pemeriksaan isLulus: ${isMatch}`);
+        console.log(`Hasil pemeriksaan isLulus: ${isMatch}`);
         return isMatch;
       }
       
       // Ambil data saat halaman dimuat
       fetchData().then(success => {
         if (success) {
-          debugLog('Data berhasil dimuat', `${dataSiswa.length} entri`);
-          
-          // Log semua data untuk debugging
-          dataSiswa.forEach((siswa, index) => {
-            debugLog(`Data siswa ${index + 1}:`, siswa);
-          });
+          console.log('Data berhasil dimuat', `${dataSiswa.length} entri`);
         } else {
-          debugLog('Gagal memuat data');
+          console.log('Gagal memuat data');
         }
       });
       
       cekButton.addEventListener('click', async function() {
         const noPendaftaran = noPendaftaranInput.value.trim();
-        debugLog('Tombol cek diklik, nomor pendaftaran', noPendaftaran);
+        console.log('Tombol cek diklik, nomor pendaftaran', noPendaftaran);
         
         if (!noPendaftaran) {
           alert('Silakan masukkan nomor pendaftaran Anda!');
-          debugLog('Nomor pendaftaran kosong');
+          console.log('Nomor pendaftaran kosong');
           return;
         }
         
@@ -975,10 +925,10 @@
         
         // Jika data belum diambil, coba ambil lagi
         if (dataSiswa.length === 0) {
-          debugLog('Data siswa kosong, mencoba mengambil data');
+          console.log('Data siswa kosong, mencoba mengambil data');
           const success = await fetchData();
           if (!success) {
-            debugLog('Gagal mengambil data');
+            console.log('Gagal mengambil data');
             return;
           }
         }
@@ -996,7 +946,7 @@
         // Tampilkan loading
         loadingOverlay.style.display = 'flex';
         loadingText.textContent = 'Memproses data...';
-        debugLog('Menampilkan loading overlay');
+        console.log('Menampilkan loading overlay');
         
         // Mulai slideshow
         startSlideshow();
@@ -1008,13 +958,13 @@
           
           // Sembunyikan loading overlay
           loadingOverlay.style.display = 'none';
-          debugLog('Loading selesai, menyembunyikan overlay');
+          console.log('Loading selesai, menyembunyikan overlay');
           
           // Tampilkan hasil
           resultContainer.style.display = 'block';
           
           // Log semua data siswa untuk debugging
-          debugLog('Data siswa yang akan ditampilkan:', siswa);
+          console.log('Data siswa yang akan ditampilkan:', siswa);
           
           // Isi data
           nama.textContent = siswa.nama || "-";
@@ -1024,14 +974,14 @@
           namaAyah.textContent = siswa.namaAyah || "-";
           
           // Tampilkan status siswa di konsol untuk debugging
-          debugLog('Status siswa', siswa.status);
+          console.log('Status siswa', siswa.status);
           
           // Periksa status kelulusan dengan fungsi yang lebih baik
           const statusLulus = isLulus(siswa.status);
-          debugLog('Hasil pemeriksaan status', statusLulus);
+          console.log('Hasil pemeriksaan status', statusLulus);
           
           if (statusLulus) {
-            debugLog('Siswa LULUS');
+            console.log('Siswa LULUS');
             statusContainer.className = "status-container lulus";
             statusKelulusan.textContent = "LULUS";
             statusKelulusan.className = "status lulus";
@@ -1039,7 +989,7 @@
             keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${siswa.kolomUrutan || "-"}</span> urutan <span class="highlight">${siswa.nomorUrutan || "-"}</span> pada lembar pengumuman.`;
             contactInfo.style.display = 'block';
           } else {
-            debugLog('Siswa TIDAK LULUS');
+            console.log('Siswa TIDAK LULUS');
             statusContainer.className = "status-container tidak-lulus";
             statusKelulusan.textContent = "MOHON MAAF";
             statusKelulusan.className = "status tidak-lulus";
@@ -1067,8 +1017,8 @@
         }
       });
       
-      debugLog('Aplikasi dimulai');
+      console.log('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b50b2a30a44c53',t:'MTc0OTE4Mjg1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5242110f340c2',t:'MTc0OTE4Mzg3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

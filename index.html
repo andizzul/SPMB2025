@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -561,8 +563,41 @@
           const csvData = await response.text();
           console.log('Data CSV diterima', csvData.substring(0, 100) + '...');
           
-          // Gunakan fungsi parsing CSV yang lebih baik
-          const parsedData = parseCSVImproved(csvData);
+          // Gunakan data dummy untuk testing jika diperlukan
+          const useDummyData = false;
+          let parsedData;
+          
+          if (useDummyData) {
+            console.log('Menggunakan data dummy untuk testing');
+            parsedData = [
+              {
+                noPendaftaran: '12345',
+                nama: 'Ahmad Siswa',
+                ttl: 'Bulukumba, 10 Januari 2010',
+                asalSekolah: 'SD Negeri 1 Bulukumba',
+                jalur: 'Reguler',
+                namaAyah: 'Bapak Ahmad',
+                status: 'LULUS',
+                kolomUrutan: 'A',
+                nomorUrutan: '1'
+              },
+              {
+                noPendaftaran: '67890',
+                nama: 'Budi Siswa',
+                ttl: 'Bulukumba, 15 Februari 2010',
+                asalSekolah: 'SD Negeri 2 Bulukumba',
+                jalur: 'Prestasi',
+                namaAyah: 'Bapak Budi',
+                status: 'TIDAK LULUS',
+                kolomUrutan: '',
+                nomorUrutan: ''
+              }
+            ];
+          } else {
+            // Parse data CSV
+            parsedData = parseCSV(csvData);
+          }
+          
           console.log(`Parsing selesai, ${parsedData.length} baris data ditemukan`);
           
           if (parsedData.length > 0) {
@@ -585,8 +620,8 @@
         }
       }
       
-      // Fungsi parsing CSV yang lebih baik dan lebih robust
-      function parseCSVImproved(csvText) {
+      // Fungsi parsing CSV yang lebih sederhana dan lebih robust
+      function parseCSV(csvText) {
         console.log('Mulai parsing CSV');
         
         // Jika tidak ada data, kembalikan array kosong
@@ -613,45 +648,7 @@
           const headers = parseCSVLine(headerLine);
           console.log('Headers yang diekstrak', headers);
           
-          // Definisikan pemetaan header yang diharapkan
-          const headerMap = {};
-          
-          // Cari indeks untuk setiap header yang diharapkan
-          for (let i = 0; i < headers.length; i++) {
-            const header = headers[i].toLowerCase().trim();
-            
-            if (header.includes('pendaftaran') || header.includes('nodaftar') || header.includes('no.') || header.includes('nomor')) {
-              headerMap.noPendaftaran = i;
-            } else if (header.includes('nama') && !header.includes('ayah') && !header.includes('ibu')) {
-              headerMap.nama = i;
-            } else if (header.includes('ttl') || header.includes('lahir')) {
-              headerMap.ttl = i;
-            } else if (header.includes('asal') || header.includes('sekolah')) {
-              headerMap.asalSekolah = i;
-            } else if (header.includes('jalur') || header.includes('seleksi')) {
-              headerMap.jalur = i;
-            } else if (header.includes('ayah') || header.includes('orang tua')) {
-              headerMap.namaAyah = i;
-            } else if (header.includes('status') || header.includes('kelulusan') || header.includes('hasil')) {
-              headerMap.status = i;
-            } else if (header.includes('kolom') || header.includes('urutan kolom')) {
-              headerMap.kolomUrutan = i;
-            } else if (header.includes('nomor urut') || header.includes('urutan')) {
-              headerMap.nomorUrutan = i;
-            }
-          }
-          
-          console.log('Pemetaan header:', headerMap);
-          
-          // Periksa apakah semua header yang diperlukan ditemukan
-          const requiredHeaders = ['noPendaftaran', 'nama', 'status'];
-          const missingHeaders = requiredHeaders.filter(header => headerMap[header] === undefined);
-          
-          if (missingHeaders.length > 0) {
-            console.error('Header yang diperlukan tidak ditemukan:', missingHeaders);
-            return [];
-          }
-          
+          // Buat array untuk menyimpan hasil
           const result = [];
           
           // Proses setiap baris data
@@ -660,23 +657,57 @@
             
             // Parse baris data dengan benar, menangani tanda kutip
             const values = parseCSVLine(lines[i]);
+            console.log(`Baris ${i} values:`, values);
             
-            // Buat objek siswa dengan pemetaan yang benar
-            const siswa = {};
+            // Buat objek dengan nama kolom yang tepat
+            const entry = {};
             
-            // Isi data siswa berdasarkan pemetaan header
-            for (const [key, index] of Object.entries(headerMap)) {
-              if (index !== undefined && index < values.length) {
-                siswa[key] = values[index];
+            // Isi data berdasarkan posisi kolom
+            for (let j = 0; j < headers.length && j < values.length; j++) {
+              const header = headers[j].trim();
+              const value = values[j].trim();
+              
+              // Coba deteksi kolom berdasarkan nama header
+              if (header.toLowerCase().includes('pendaftaran') || header.toLowerCase().includes('nodaftar')) {
+                entry.noPendaftaran = value;
+              } else if (header.toLowerCase().includes('nama') && !header.toLowerCase().includes('ayah') && !header.toLowerCase().includes('orang tua')) {
+                entry.nama = value;
+              } else if (header.toLowerCase().includes('ttl') || header.toLowerCase().includes('lahir')) {
+                entry.ttl = value;
+              } else if (header.toLowerCase().includes('asal') || header.toLowerCase().includes('sekolah')) {
+                entry.asalSekolah = value;
+              } else if (header.toLowerCase().includes('jalur')) {
+                entry.jalur = value;
+              } else if (header.toLowerCase().includes('ayah') || header.toLowerCase().includes('orang tua')) {
+                entry.namaAyah = value;
+              } else if (header.toLowerCase().includes('status') || header.toLowerCase().includes('kelulusan')) {
+                entry.status = value;
+              } else if (header.toLowerCase().includes('kolom')) {
+                entry.kolomUrutan = value;
+              } else if (header.toLowerCase().includes('urutan') || header.toLowerCase().includes('nomor urut')) {
+                entry.nomorUrutan = value;
               } else {
-                siswa[key] = '';
+                // Jika tidak ada yang cocok, gunakan nama header asli
+                entry[header] = value;
               }
             }
             
-            // Log data siswa untuk debugging
-            console.log(`Siswa ${i}:`, siswa);
+            // Pastikan semua properti yang diperlukan ada
+            entry.noPendaftaran = entry.noPendaftaran || '';
+            entry.nama = entry.nama || '';
+            entry.ttl = entry.ttl || '';
+            entry.asalSekolah = entry.asalSekolah || '';
+            entry.jalur = entry.jalur || '';
+            entry.namaAyah = entry.namaAyah || '';
+            entry.status = entry.status || '';
+            entry.kolomUrutan = entry.kolomUrutan || '';
+            entry.nomorUrutan = entry.nomorUrutan || '';
             
-            result.push(siswa);
+            // Tambahkan entri ke hasil
+            result.push(entry);
+            
+            // Log untuk debugging
+            console.log(`Entri ${i}:`, entry);
           }
           
           console.log(`Parsing selesai, ${result.length} entri data`);
@@ -736,13 +767,19 @@
         const cleanNoPendaftaran = noPendaftaran.trim().toLowerCase();
         console.log('Mencari nomor pendaftaran', cleanNoPendaftaran);
         
+        // Log semua nomor pendaftaran yang ada untuk debugging
+        console.log('Daftar nomor pendaftaran yang tersedia:');
+        dataSiswa.forEach((siswa, index) => {
+          console.log(`${index + 1}. ${siswa.noPendaftaran}`);
+        });
+        
         // Cari siswa dengan nomor pendaftaran yang cocok
         for (let i = 0; i < dataSiswa.length; i++) {
           const siswa = dataSiswa[i];
           
           // Periksa apakah siswa memiliki properti noPendaftaran
           if (!siswa.noPendaftaran) {
-            console.log('Siswa tidak memiliki properti noPendaftaran', siswa);
+            console.log(`Siswa ${i + 1} tidak memiliki properti noPendaftaran`);
             continue;
           }
           
@@ -1043,5 +1080,5 @@
       console.log('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b53740311e9d17',t:'MTc0OTE4NDY2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b554919454fd3e',t:'MTc0OTE4NTg2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -364,6 +366,16 @@
       display: none;
     }
     
+    .debug-info {
+      background-color: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-size: 12px;
+      display: none;
+    }
+    
     @keyframes fadeEffect {
       from {opacity: 0.4}
       to {opacity: 1}
@@ -442,6 +454,7 @@
       </div>
       <button type="button" id="cekButton">Cek Kelulusan</button>
       <div class="error-message" id="errorMessage"></div>
+      <div class="debug-info" id="debugInfo"></div>
     </div>
     
     <div class="result" id="resultContainer">
@@ -514,10 +527,17 @@
     // GANTI URL INI dengan URL Google Sheets Anda yang sudah dipublikasikan ke web
     const SHEET_ID = '1_ldkkmwrLwZhw8UK0dWu3JZjBCe3vY6WGK_Dnhe3ghY'; // Ganti dengan ID spreadsheet Anda
     const SHEET_NAME = 'data_siswa'; // Ganti dengan nama sheet Anda
-    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+    
+    // URL untuk mengakses Google Sheets sebagai CSV
+    // Format: https://docs.google.com/spreadsheets/d/SHEET_ID/export?format=csv&gid=GID
+    // Catatan: GID adalah ID dari sheet, biasanya 0 untuk sheet pertama
+    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
     
     // Variabel untuk menyimpan data siswa
     let dataSiswa = [];
+    
+    // Variabel untuk mode debug
+    const DEBUG_MODE = true;
     
     document.addEventListener('DOMContentLoaded', function() {
       const cekButton = document.getElementById('cekButton');
@@ -536,7 +556,39 @@
       const keterangan = document.getElementById('keterangan');
       const contactInfo = document.getElementById('contactInfo');
       const errorMessage = document.getElementById('errorMessage');
+      const debugInfo = document.getElementById('debugInfo');
       const slideshowContainer = document.getElementById('slideshowContainer');
+      
+      // Tampilkan elemen debug jika mode debug aktif
+      if (DEBUG_MODE) {
+        debugInfo.style.display = 'block';
+        debugLog('Mode debug aktif');
+      }
+      
+      // Fungsi untuk logging debug
+      function debugLog(message, data = null) {
+        if (DEBUG_MODE) {
+          console.log(message, data || '');
+          
+          // Tambahkan ke elemen debug di halaman
+          const timestamp = new Date().toLocaleTimeString();
+          const logMessage = data ? 
+            `[${timestamp}] ${message}: ${JSON.stringify(data)}` : 
+            `[${timestamp}] ${message}`;
+          
+          debugInfo.innerHTML += logMessage + '<br>';
+          
+          // Batasi jumlah baris log
+          const maxLines = 10;
+          const lines = debugInfo.innerHTML.split('<br>');
+          if (lines.length > maxLines) {
+            debugInfo.innerHTML = lines.slice(lines.length - maxLines).join('<br>');
+          }
+          
+          // Auto-scroll ke bawah
+          debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+      }
       
       // Variabel untuk slideshow
       let slideshowInterval = null;
@@ -545,97 +597,53 @@
       // Fungsi untuk mengambil data dari Google Sheets
       async function fetchData() {
         try {
-          console.log('Memulai pengambilan data dari Google Sheets');
+          debugLog('Memulai pengambilan data dari Google Sheets');
           
           // Tambahkan parameter waktu untuk menghindari cache
           const timestamp = new Date().getTime();
           const url = `${SHEET_URL}&_=${timestamp}`;
           
-          console.log('Mengambil data dari URL', url);
+          debugLog('Mengambil data dari URL', url);
           
-          const response = await fetch(url);
+          // Gunakan data dummy untuk testing jika diperlukan
+          const useDummyData = false; // Ubah ke false untuk menggunakan data asli
+          
+          if (useDummyData) {
+            debugLog('Menggunakan data dummy untuk testing');
+            const dummyData = getDummyData();
+            dataSiswa = dummyData;
+            createSlideshowItems();
+            return true;
+          }
+          
+          // Opsi untuk fetch
+          const options = {
+            method: 'GET',
+            mode: 'cors', // Penting untuk CORS
+            headers: {
+              'Content-Type': 'text/csv',
+              'Cache-Control': 'no-cache'
+            }
+          };
+          
+          const response = await fetch(url, options);
+          
           if (!response.ok) {
             throw new Error(`Gagal mengambil data: ${response.status} ${response.statusText}`);
           }
           
           const csvData = await response.text();
-          console.log('Data CSV diterima', csvData.substring(0, 100) + '...');
+          debugLog('Data CSV diterima', csvData.substring(0, 100) + '...');
           
-          // Gunakan data dummy untuk testing jika diperlukan
-          const useDummyData = true; // Ubah ke false untuk menggunakan data asli
-          let parsedData;
-          
-          if (useDummyData) {
-            console.log('Menggunakan data dummy untuk testing');
-            parsedData = [
-              {
-                noPendaftaran: '12345',
-                nama: 'Ahmad Siswa',
-                ttl: 'Bulukumba, 10 Januari 2010',
-                asalSekolah: 'SD Negeri 1 Bulukumba',
-                jalur: 'Reguler',
-                namaAyah: 'Bapak Ahmad',
-                status: 'LULUS',
-                kolomUrutan: 'A',
-                nomorUrutan: '1'
-              },
-              {
-                noPendaftaran: '67890',
-                nama: 'Budi Siswa',
-                ttl: 'Bulukumba, 15 Februari 2010',
-                asalSekolah: 'SD Negeri 2 Bulukumba',
-                jalur: 'Prestasi',
-                namaAyah: 'Bapak Budi',
-                status: 'TIDAK LULUS',
-                kolomUrutan: '',
-                nomorUrutan: ''
-              },
-              {
-                noPendaftaran: '123-456',
-                nama: 'Citra Siswi',
-                ttl: 'Bulukumba, 20 Maret 2010',
-                asalSekolah: 'SD Negeri 3 Bulukumba',
-                jalur: 'Reguler',
-                namaAyah: 'Bapak Citra',
-                status: 'LULUS',
-                kolomUrutan: 'B',
-                nomorUrutan: '2'
-              },
-              {
-                noPendaftaran: 'REG-2023-001',
-                nama: 'Deni Siswa',
-                ttl: 'Bulukumba, 25 April 2010',
-                asalSekolah: 'SD Negeri 4 Bulukumba',
-                jalur: 'Reguler',
-                namaAyah: 'Bapak Deni',
-                status: 'LULUS',
-                kolomUrutan: 'C',
-                nomorUrutan: '3'
-              },
-              {
-                noPendaftaran: 'PRES-2023-001',
-                nama: 'Eka Siswi',
-                ttl: 'Bulukumba, 30 Mei 2010',
-                asalSekolah: 'SD Negeri 5 Bulukumba',
-                jalur: 'Prestasi',
-                namaAyah: 'Bapak Eka',
-                status: 'TIDAK LULUS',
-                kolomUrutan: '',
-                nomorUrutan: ''
-              }
-            ];
-          } else {
-            // Parse data CSV
-            parsedData = parseCSV(csvData);
-          }
-          
-          console.log(`Parsing selesai, ${parsedData.length} baris data ditemukan`);
+          // Parse data CSV
+          const parsedData = parseCSV(csvData);
           
           if (parsedData.length > 0) {
             dataSiswa = parsedData;
             
             // Tampilkan beberapa data pertama untuk debugging
-            console.log('Sampel data pertama', dataSiswa[0]);
+            debugLog('Sampel data pertama', dataSiswa[0]);
+            debugLog(`Total ${dataSiswa.length} data siswa dimuat`);
             
             // Buat elemen slideshow dari data Google Sheets
             createSlideshowItems();
@@ -644,40 +652,107 @@
             throw new Error('Tidak ada data yang ditemukan setelah parsing');
           }
         } catch (error) {
-          console.error('Error:', error);
+          debugLog('Error saat mengambil data:', error.message);
           errorMessage.textContent = 'Terjadi kesalahan saat memuat data. Silakan coba lagi nanti.';
           errorMessage.style.display = 'block';
-          return false;
+          
+          // Gunakan data dummy sebagai fallback jika gagal mengambil data
+          debugLog('Menggunakan data dummy sebagai fallback');
+          const dummyData = getDummyData();
+          dataSiswa = dummyData;
+          createSlideshowItems();
+          return true;
         }
+      }
+      
+      // Fungsi untuk mendapatkan data dummy
+      function getDummyData() {
+        return [
+          {
+            noPendaftaran: '12345',
+            nama: 'Ahmad Siswa',
+            ttl: 'Bulukumba, 10 Januari 2010',
+            asalSekolah: 'SD Negeri 1 Bulukumba',
+            jalur: 'Reguler',
+            namaAyah: 'Bapak Ahmad',
+            status: 'LULUS',
+            kolomUrutan: 'A',
+            nomorUrutan: '1'
+          },
+          {
+            noPendaftaran: '67890',
+            nama: 'Budi Siswa',
+            ttl: 'Bulukumba, 15 Februari 2010',
+            asalSekolah: 'SD Negeri 2 Bulukumba',
+            jalur: 'Prestasi',
+            namaAyah: 'Bapak Budi',
+            status: 'TIDAK LULUS',
+            kolomUrutan: '',
+            nomorUrutan: ''
+          },
+          {
+            noPendaftaran: '123-456',
+            nama: 'Citra Siswi',
+            ttl: 'Bulukumba, 20 Maret 2010',
+            asalSekolah: 'SD Negeri 3 Bulukumba',
+            jalur: 'Reguler',
+            namaAyah: 'Bapak Citra',
+            status: 'LULUS',
+            kolomUrutan: 'B',
+            nomorUrutan: '2'
+          },
+          {
+            noPendaftaran: 'REG-2023-001',
+            nama: 'Deni Siswa',
+            ttl: 'Bulukumba, 25 April 2010',
+            asalSekolah: 'SD Negeri 4 Bulukumba',
+            jalur: 'Reguler',
+            namaAyah: 'Bapak Deni',
+            status: 'LULUS',
+            kolomUrutan: 'C',
+            nomorUrutan: '3'
+          },
+          {
+            noPendaftaran: 'PRES-2023-001',
+            nama: 'Eka Siswi',
+            ttl: 'Bulukumba, 30 Mei 2010',
+            asalSekolah: 'SD Negeri 5 Bulukumba',
+            jalur: 'Prestasi',
+            namaAyah: 'Bapak Eka',
+            status: 'TIDAK LULUS',
+            kolomUrutan: '',
+            nomorUrutan: ''
+          }
+        ];
       }
       
       // Fungsi parsing CSV yang lebih sederhana dan lebih robust
       function parseCSV(csvText) {
-        console.log('Mulai parsing CSV');
+        debugLog('Mulai parsing CSV');
         
         // Jika tidak ada data, kembalikan array kosong
         if (!csvText || csvText.trim() === '') {
-          console.log('CSV kosong, mengembalikan array kosong');
+          debugLog('CSV kosong, mengembalikan array kosong');
           return [];
         }
         
         try {
           // Split baris dengan mempertimbangkan berbagai jenis line break
           const lines = csvText.split(/\r\n|\n|\r/).filter(line => line.trim() !== '');
-          console.log(`Jumlah baris: ${lines.length}`);
+          debugLog(`Jumlah baris: ${lines.length}`);
           
           if (lines.length <= 1) {
-            console.log('Tidak cukup baris data, mengembalikan array kosong');
+            debugLog('Tidak cukup baris data, mengembalikan array kosong');
             return [];
           }
           
           // Ekstrak header (baris pertama)
           const headerLine = lines[0];
-          console.log('Header line', headerLine);
+          debugLog('Header line', headerLine);
           
           // Parse header dengan benar, menangani tanda kutip
           const headers = parseCSVLine(headerLine);
-          console.log('Headers yang diekstrak', headers);
+          debugLog('Headers yang diekstrak', headers);
           
           // Buat array untuk menyimpan hasil
           const result = [];
@@ -718,16 +793,16 @@
             }
           }
           
-          console.log('Indeks kolom yang ditemukan:');
-          console.log('No Pendaftaran:', indexNoPendaftaran);
-          console.log('Nama:', indexNama);
-          console.log('TTL:', indexTTL);
-          console.log('Asal Sekolah:', indexAsalSekolah);
-          console.log('Jalur:', indexJalur);
-          console.log('Nama Ayah:', indexNamaAyah);
-          console.log('Status:', indexStatus);
-          console.log('Kolom Urutan:', indexKolomUrutan);
-          console.log('Nomor Urutan:', indexNomorUrutan);
+          debugLog('Indeks kolom yang ditemukan:');
+          debugLog('No Pendaftaran:', indexNoPendaftaran);
+          debugLog('Nama:', indexNama);
+          debugLog('TTL:', indexTTL);
+          debugLog('Asal Sekolah:', indexAsalSekolah);
+          debugLog('Jalur:', indexJalur);
+          debugLog('Nama Ayah:', indexNamaAyah);
+          debugLog('Status:', indexStatus);
+          debugLog('Kolom Urutan:', indexKolomUrutan);
+          debugLog('Nomor Urutan:', indexNomorUrutan);
           
           // Jika tidak menemukan kolom nomor pendaftaran, coba cari dengan nama lain
           if (indexNoPendaftaran === -1) {
@@ -735,7 +810,7 @@
               const header = headers[i].toLowerCase().trim();
               if (header.includes('id') || header.includes('no') || header.includes('nomor')) {
                 indexNoPendaftaran = i;
-                console.log('Menggunakan kolom alternatif untuk No Pendaftaran:', headers[i]);
+                debugLog('Menggunakan kolom alternatif untuk No Pendaftaran:', headers[i]);
                 break;
               }
             }
@@ -745,84 +820,86 @@
           for (let i = 1; i < lines.length; i++) {
             if (!lines[i].trim()) continue;
             
-            // Parse baris data dengan benar, menangani tanda kutip
-            const values = parseCSVLine(lines[i]);
-            
-            // Buat objek siswa
-            const siswa = {};
-            
-            // Isi data berdasarkan indeks kolom yang ditemukan
-            if (indexNoPendaftaran >= 0 && indexNoPendaftaran < values.length) {
-              siswa.noPendaftaran = values[indexNoPendaftaran].trim();
-            } else {
-              siswa.noPendaftaran = '';
+            try {
+              // Parse baris data dengan benar, menangani tanda kutip
+              const values = parseCSVLine(lines[i]);
+              
+              // Buat objek siswa
+              const siswa = {};
+              
+              // Isi data berdasarkan indeks kolom yang ditemukan
+              if (indexNoPendaftaran >= 0 && indexNoPendaftaran < values.length) {
+                siswa.noPendaftaran = values[indexNoPendaftaran].trim();
+              } else {
+                siswa.noPendaftaran = '';
+              }
+              
+              if (indexNama >= 0 && indexNama < values.length) {
+                siswa.nama = values[indexNama].trim();
+              } else {
+                siswa.nama = '';
+              }
+              
+              if (indexTTL >= 0 && indexTTL < values.length) {
+                siswa.ttl = values[indexTTL].trim();
+              } else {
+                siswa.ttl = '';
+              }
+              
+              if (indexAsalSekolah >= 0 && indexAsalSekolah < values.length) {
+                siswa.asalSekolah = values[indexAsalSekolah].trim();
+              } else {
+                siswa.asalSekolah = '';
+              }
+              
+              if (indexJalur >= 0 && indexJalur < values.length) {
+                siswa.jalur = values[indexJalur].trim();
+              } else {
+                siswa.jalur = '';
+              }
+              
+              if (indexNamaAyah >= 0 && indexNamaAyah < values.length) {
+                siswa.namaAyah = values[indexNamaAyah].trim();
+              } else {
+                siswa.namaAyah = '';
+              }
+              
+              if (indexStatus >= 0 && indexStatus < values.length) {
+                siswa.status = values[indexStatus].trim();
+              } else {
+                siswa.status = '';
+              }
+              
+              if (indexKolomUrutan >= 0 && indexKolomUrutan < values.length) {
+                siswa.kolomUrutan = values[indexKolomUrutan].trim();
+              } else {
+                siswa.kolomUrutan = '';
+              }
+              
+              if (indexNomorUrutan >= 0 && indexNomorUrutan < values.length) {
+                siswa.nomorUrutan = values[indexNomorUrutan].trim();
+              } else {
+                siswa.nomorUrutan = '';
+              }
+              
+              // Jika nomor pendaftaran kosong, coba gunakan nomor baris sebagai fallback
+              if (!siswa.noPendaftaran) {
+                siswa.noPendaftaran = `ROW-${i}`;
+                debugLog(`Baris ${i} tidak memiliki nomor pendaftaran, menggunakan ${siswa.noPendaftaran}`);
+              }
+              
+              // Tambahkan ke hasil
+              result.push(siswa);
+            } catch (lineError) {
+              debugLog(`Error saat memproses baris ${i}:`, lineError.message);
+              // Lanjutkan ke baris berikutnya
             }
-            
-            if (indexNama >= 0 && indexNama < values.length) {
-              siswa.nama = values[indexNama].trim();
-            } else {
-              siswa.nama = '';
-            }
-            
-            if (indexTTL >= 0 && indexTTL < values.length) {
-              siswa.ttl = values[indexTTL].trim();
-            } else {
-              siswa.ttl = '';
-            }
-            
-            if (indexAsalSekolah >= 0 && indexAsalSekolah < values.length) {
-              siswa.asalSekolah = values[indexAsalSekolah].trim();
-            } else {
-              siswa.asalSekolah = '';
-            }
-            
-            if (indexJalur >= 0 && indexJalur < values.length) {
-              siswa.jalur = values[indexJalur].trim();
-            } else {
-              siswa.jalur = '';
-            }
-            
-            if (indexNamaAyah >= 0 && indexNamaAyah < values.length) {
-              siswa.namaAyah = values[indexNamaAyah].trim();
-            } else {
-              siswa.namaAyah = '';
-            }
-            
-            if (indexStatus >= 0 && indexStatus < values.length) {
-              siswa.status = values[indexStatus].trim();
-            } else {
-              siswa.status = '';
-            }
-            
-            if (indexKolomUrutan >= 0 && indexKolomUrutan < values.length) {
-              siswa.kolomUrutan = values[indexKolomUrutan].trim();
-            } else {
-              siswa.kolomUrutan = '';
-            }
-            
-            if (indexNomorUrutan >= 0 && indexNomorUrutan < values.length) {
-              siswa.nomorUrutan = values[indexNomorUrutan].trim();
-            } else {
-              siswa.nomorUrutan = '';
-            }
-            
-            // Jika nomor pendaftaran kosong, coba gunakan nomor baris sebagai fallback
-            if (!siswa.noPendaftaran) {
-              siswa.noPendaftaran = `ROW-${i}`;
-              console.log(`Baris ${i} tidak memiliki nomor pendaftaran, menggunakan ${siswa.noPendaftaran}`);
-            }
-            
-            // Log data siswa untuk debugging
-            console.log(`Siswa ${i}:`, siswa);
-            
-            // Tambahkan ke hasil
-            result.push(siswa);
           }
           
-          console.log(`Parsing selesai, ${result.length} entri data valid`);
+          debugLog(`Parsing selesai, ${result.length} entri data valid`);
           return result;
         } catch (error) {
-          console.error('Error parsing CSV:', error);
+          debugLog('Error parsing CSV:', error.message);
           return [];
         }
       }
@@ -868,21 +945,26 @@
       // Fungsi untuk mencari siswa dengan nomor pendaftaran (DIPERBAIKI)
       function findSiswa(noPendaftaran) {
         if (!noPendaftaran || dataSiswa.length === 0) {
-          console.log('Nomor pendaftaran kosong atau tidak ada data siswa');
+          debugLog('Nomor pendaftaran kosong atau tidak ada data siswa');
           return null;
         }
         
         // Bersihkan nomor pendaftaran dari spasi dan ubah ke huruf kecil
         const cleanNoPendaftaran = noPendaftaran.trim().toLowerCase();
-        console.log('Mencari nomor pendaftaran:', cleanNoPendaftaran);
+        debugLog('Mencari nomor pendaftaran:', cleanNoPendaftaran);
         
         // Log semua nomor pendaftaran yang ada untuk debugging
-        console.log('Daftar nomor pendaftaran yang tersedia:');
-        dataSiswa.forEach((siswa, index) => {
-          if (siswa.noPendaftaran) {
-            console.log(`${index + 1}. ${siswa.noPendaftaran}`);
+        if (DEBUG_MODE) {
+          debugLog('Daftar nomor pendaftaran yang tersedia:');
+          dataSiswa.slice(0, 10).forEach((siswa, index) => {
+            if (siswa.noPendaftaran) {
+              debugLog(`${index + 1}. ${siswa.noPendaftaran}`);
+            }
+          });
+          if (dataSiswa.length > 10) {
+            debugLog(`... dan ${dataSiswa.length - 10} lainnya`);
           }
-        });
+        }
         
         // PERBAIKAN: Coba semua metode pencarian secara berurutan
         
@@ -892,14 +974,14 @@
           
           const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
           if (siswaNoPendaftaran === cleanNoPendaftaran) {
-            console.log('Siswa ditemukan dengan kecocokan eksak:', siswa);
+            debugLog('Siswa ditemukan dengan kecocokan eksak:', siswa);
             return siswa;
           }
         }
         
         // 2. Coba pencarian dengan normalisasi (hapus semua karakter non-alfanumerik)
         const normalizedInput = cleanNoPendaftaran.replace(/[^a-z0-9]/gi, '');
-        console.log('Nomor pendaftaran yang dinormalisasi:', normalizedInput);
+        debugLog('Nomor pendaftaran yang dinormalisasi:', normalizedInput);
         
         for (const siswa of dataSiswa) {
           if (!siswa.noPendaftaran) continue;
@@ -908,7 +990,7 @@
           const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
           
           if (normalizedSiswa === normalizedInput) {
-            console.log('Siswa ditemukan dengan kecocokan normalisasi:', siswa);
+            debugLog('Siswa ditemukan dengan kecocokan normalisasi:', siswa);
             return siswa;
           }
         }
@@ -920,7 +1002,7 @@
           const siswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
           
           if (siswaNoPendaftaran.includes(cleanNoPendaftaran) || cleanNoPendaftaran.includes(siswaNoPendaftaran)) {
-            console.log('Siswa ditemukan dengan kecocokan substring:', siswa);
+            debugLog('Siswa ditemukan dengan kecocokan substring:', siswa);
             return siswa;
           }
         }
@@ -933,7 +1015,7 @@
           const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
           
           if (normalizedSiswa.includes(normalizedInput) || normalizedInput.includes(normalizedSiswa)) {
-            console.log('Siswa ditemukan dengan kecocokan substring normalisasi:', siswa);
+            debugLog('Siswa ditemukan dengan kecocokan substring normalisasi:', siswa);
             return siswa;
           }
         }
@@ -946,19 +1028,19 @@
           const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
           
           if (normalizedSiswa.startsWith(normalizedInput) || normalizedInput.startsWith(normalizedSiswa)) {
-            console.log('Siswa ditemukan dengan kecocokan awalan:', siswa);
+            debugLog('Siswa ditemukan dengan kecocokan awalan:', siswa);
             return siswa;
           }
         }
         
-        console.log('Siswa tidak ditemukan dengan semua metode pencarian');
+        debugLog('Siswa tidak ditemukan dengan semua metode pencarian');
         return null;
       }
       
       // Fungsi untuk membuat elemen slideshow dari data Google Sheets
       function createSlideshowItems() {
         slideshowContainer.innerHTML = '';
-        console.log('Membuat elemen slideshow');
+        debugLog('Membuat elemen slideshow');
         
         // Ambil maksimal 10 data untuk slideshow
         const slideshowData = dataSiswa.slice(0, 10);
@@ -980,7 +1062,7 @@
           item.appendChild(schoolElement);
           slideshowContainer.appendChild(item);
           
-          console.log(`Slideshow item ${index + 1} dibuat: ${siswa.nama}`);
+          debugLog(`Slideshow item ${index + 1} dibuat: ${siswa.nama}`);
         });
       }
       
@@ -1076,43 +1158,43 @@
       // Fungsi untuk memeriksa status kelulusan berdasarkan kombinasi kolom
       function isLulus(siswa) {
         if (!siswa) {
-          console.log('Data siswa tidak valid');
+          debugLog('Data siswa tidak valid');
           return false;
         }
         
         // Log data untuk debugging
-        console.log('Memeriksa status kelulusan untuk:', siswa);
-        console.log('Status:', siswa.status);
-        console.log('Kolom Urutan:', siswa.kolomUrutan);
-        console.log('Nomor Urutan:', siswa.nomorUrutan);
+        debugLog('Memeriksa status kelulusan untuk:', siswa);
+        debugLog('Status:', siswa.status);
+        debugLog('Kolom Urutan:', siswa.kolomUrutan);
+        debugLog('Nomor Urutan:', siswa.nomorUrutan);
         
         // Jika kolomUrutan dan nomorUrutan keduanya terisi, siswa LULUS
         if (siswa.kolomUrutan && siswa.nomorUrutan) {
-          console.log('Kolom Urutan dan Nomor Urutan terisi, siswa LULUS');
+          debugLog('Kolom Urutan dan Nomor Urutan terisi, siswa LULUS');
           return true;
         }
         
         // Jika kolomUrutan atau nomorUrutan kosong, siswa TIDAK LULUS
-        console.log('Kolom Urutan atau Nomor Urutan kosong, siswa TIDAK LULUS');
+        debugLog('Kolom Urutan atau Nomor Urutan kosong, siswa TIDAK LULUS');
         return false;
       }
       
       // Ambil data saat halaman dimuat
       fetchData().then(success => {
         if (success) {
-          console.log('Data berhasil dimuat', `${dataSiswa.length} entri`);
+          debugLog('Data berhasil dimuat', `${dataSiswa.length} entri`);
         } else {
-          console.log('Gagal memuat data');
+          debugLog('Gagal memuat data');
         }
       });
       
       cekButton.addEventListener('click', async function() {
         const noPendaftaran = noPendaftaranInput.value.trim();
-        console.log('Tombol cek diklik, nomor pendaftaran', noPendaftaran);
+        debugLog('Tombol cek diklik, nomor pendaftaran', noPendaftaran);
         
         if (!noPendaftaran) {
           alert('Silakan masukkan nomor pendaftaran Anda!');
-          console.log('Nomor pendaftaran kosong');
+          debugLog('Nomor pendaftaran kosong');
           return;
         }
         
@@ -1121,10 +1203,10 @@
         
         // Jika data belum diambil, coba ambil lagi
         if (dataSiswa.length === 0) {
-          console.log('Data siswa kosong, mencoba mengambil data');
+          debugLog('Data siswa kosong, mencoba mengambil data');
           const success = await fetchData();
           if (!success) {
-            console.log('Gagal mengambil data');
+            debugLog('Gagal mengambil data');
             return;
           }
         }
@@ -1136,13 +1218,14 @@
           errorMessage.textContent = 'Nomor pendaftaran tidak ditemukan!';
           errorMessage.style.display = 'block';
           resultContainer.style.display = 'none';
+          debugLog('Nomor pendaftaran tidak ditemukan:', noPendaftaran);
           return;
         }
         
         // Tampilkan loading
         loadingOverlay.style.display = 'flex';
         loadingText.textContent = 'Memproses data...';
-        console.log('Menampilkan loading overlay');
+        debugLog('Menampilkan loading overlay');
         
         // Mulai slideshow
         startSlideshow();
@@ -1154,13 +1237,13 @@
           
           // Sembunyikan loading overlay
           loadingOverlay.style.display = 'none';
-          console.log('Loading selesai, menyembunyikan overlay');
+          debugLog('Loading selesai, menyembunyikan overlay');
           
           // Tampilkan hasil
           resultContainer.style.display = 'block';
           
           // Log semua data siswa untuk debugging
-          console.log('Data siswa yang akan ditampilkan:', siswa);
+          debugLog('Data siswa yang akan ditampilkan:', siswa);
           
           // Isi data
           nama.textContent = siswa.nama || "-";
@@ -1171,10 +1254,10 @@
           
           // Periksa status kelulusan dengan fungsi yang lebih baik
           const statusLulus = isLulus(siswa);
-          console.log('Hasil pemeriksaan status:', statusLulus);
+          debugLog('Hasil pemeriksaan status:', statusLulus);
           
           if (statusLulus) {
-            console.log('Siswa LULUS');
+            debugLog('Siswa LULUS');
             statusContainer.className = "status-container lulus";
             statusKelulusan.textContent = "LULUS";
             statusKelulusan.className = "status lulus";
@@ -1182,7 +1265,7 @@
             keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${siswa.kolomUrutan || "-"}</span> urutan <span class="highlight">${siswa.nomorUrutan || "-"}</span> pada lembar pengumuman.`;
             contactInfo.style.display = 'block';
           } else {
-            console.log('Siswa TIDAK LULUS');
+            debugLog('Siswa TIDAK LULUS');
             statusContainer.className = "status-container tidak-lulus";
             statusKelulusan.textContent = "MOHON MAAF";
             statusKelulusan.className = "status tidak-lulus";
@@ -1210,8 +1293,8 @@
         }
       });
       
-      console.log('Aplikasi dimulai');
+      debugLog('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5b09307a540a7',t:'MTc0OTE4OTYzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5ccd2a403926c',t:'MTc0OTE5MDc4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -698,6 +698,18 @@
           console.log('Kolom Urutan:', indexKolomUrutan);
           console.log('Nomor Urutan:', indexNomorUrutan);
           
+          // Jika tidak menemukan kolom nomor pendaftaran, coba cari dengan nama lain
+          if (indexNoPendaftaran === -1) {
+            for (let i = 0; i < headers.length; i++) {
+              const header = headers[i].toLowerCase().trim();
+              if (header.includes('id') || header.includes('no') || header.includes('nomor')) {
+                indexNoPendaftaran = i;
+                console.log('Menggunakan kolom alternatif untuk No Pendaftaran:', headers[i]);
+                break;
+              }
+            }
+          }
+          
           // Proses setiap baris data
           for (let i = 1; i < lines.length; i++) {
             if (!lines[i].trim()) continue;
@@ -763,10 +775,10 @@
               siswa.nomorUrutan = '';
             }
             
-            // Jika status kosong, lewati data ini
-            if (!siswa.status) {
-              console.log(`Siswa ${i} dilewati karena status kosong:`, siswa);
-              continue;
+            // Jika nomor pendaftaran kosong, coba gunakan nomor baris sebagai fallback
+            if (!siswa.noPendaftaran) {
+              siswa.noPendaftaran = `ROW-${i}`;
+              console.log(`Baris ${i} tidak memiliki nomor pendaftaran, menggunakan ${siswa.noPendaftaran}`);
             }
             
             // Log data siswa untuk debugging
@@ -831,35 +843,68 @@
         
         // Bersihkan nomor pendaftaran dari spasi dan ubah ke huruf kecil
         const cleanNoPendaftaran = noPendaftaran.trim().toLowerCase();
-        console.log('Mencari nomor pendaftaran', cleanNoPendaftaran);
+        console.log('Mencari nomor pendaftaran:', cleanNoPendaftaran);
         
         // Log semua nomor pendaftaran yang ada untuk debugging
         console.log('Daftar nomor pendaftaran yang tersedia:');
         dataSiswa.forEach((siswa, index) => {
-          console.log(`${index + 1}. ${siswa.noPendaftaran}`);
+          if (siswa.noPendaftaran) {
+            console.log(`${index + 1}. ${siswa.noPendaftaran}`);
+          }
         });
         
-        // Cari siswa dengan nomor pendaftaran yang cocok
+        // Normalisasi nomor pendaftaran (hapus semua karakter non-alfanumerik)
+        const normalizedInput = cleanNoPendaftaran.replace(/[^a-z0-9]/gi, '');
+        console.log('Nomor pendaftaran yang dinormalisasi:', normalizedInput);
+        
+        // Cari dengan kecocokan eksak terlebih dahulu
         for (let i = 0; i < dataSiswa.length; i++) {
           const siswa = dataSiswa[i];
           
           // Periksa apakah siswa memiliki properti noPendaftaran
           if (!siswa.noPendaftaran) {
-            console.log(`Siswa ${i + 1} tidak memiliki properti noPendaftaran`);
             continue;
           }
           
           // Bersihkan nomor pendaftaran siswa dari spasi dan ubah ke huruf kecil
           const cleanSiswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
           
-          // Periksa kecocokan
+          // Periksa kecocokan eksak
           if (cleanSiswaNoPendaftaran === cleanNoPendaftaran) {
-            console.log('Siswa ditemukan', siswa);
+            console.log('Siswa ditemukan dengan kecocokan eksak:', siswa);
+            return siswa;
+          }
+          
+          // Normalisasi nomor pendaftaran siswa
+          const normalizedSiswa = cleanSiswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
+          
+          // Periksa kecocokan dengan nomor yang dinormalisasi
+          if (normalizedSiswa === normalizedInput) {
+            console.log('Siswa ditemukan dengan kecocokan normalisasi:', siswa);
             return siswa;
           }
         }
         
-        console.log('Siswa tidak ditemukan');
+        // Jika tidak ditemukan dengan kecocokan eksak, coba dengan kecocokan parsial
+        console.log('Mencoba pencarian dengan kecocokan parsial...');
+        for (let i = 0; i < dataSiswa.length; i++) {
+          const siswa = dataSiswa[i];
+          
+          if (!siswa.noPendaftaran) {
+            continue;
+          }
+          
+          const cleanSiswaNoPendaftaran = siswa.noPendaftaran.toString().trim().toLowerCase();
+          const normalizedSiswa = cleanSiswaNoPendaftaran.replace(/[^a-z0-9]/gi, '');
+          
+          // Periksa apakah nomor pendaftaran siswa mengandung input
+          if (normalizedSiswa.includes(normalizedInput) || normalizedInput.includes(normalizedSiswa)) {
+            console.log('Siswa ditemukan dengan kecocokan parsial:', siswa);
+            return siswa;
+          }
+        }
+        
+        console.log('Siswa tidak ditemukan dengan semua metode pencarian');
         return null;
       }
       
@@ -994,54 +1039,14 @@
         console.log('Kolom Urutan:', siswa.kolomUrutan);
         console.log('Nomor Urutan:', siswa.nomorUrutan);
         
-        // Jika kolom status kosong, anggap tidak lulus
-        if (!siswa.status) {
-          console.log('Status kosong, dianggap TIDAK LULUS');
-          return false;
-        }
-        
         // Jika kolomUrutan dan nomorUrutan keduanya terisi, siswa LULUS
         if (siswa.kolomUrutan && siswa.nomorUrutan) {
           console.log('Kolom Urutan dan Nomor Urutan terisi, siswa LULUS');
           return true;
         }
         
-        // Jika kolomUrutan atau nomorUrutan kosong, periksa status
-        if (!siswa.kolomUrutan || !siswa.nomorUrutan) {
-          console.log('Kolom Urutan atau Nomor Urutan kosong, memeriksa status');
-          
-          // Konversi status ke string dan bersihkan
-          const statusStr = String(siswa.status).trim().toLowerCase();
-          
-          // Pola untuk status LULUS
-          const lulusPatterns = [
-            'lulus', 
-            'l u l u s', 
-            'l.u.l.u.s', 
-            'l-u-l-u-s',
-            'ya', 
-            'yes',
-            'lolos',
-            'diterima',
-            '1',
-            '1.0',
-            'true'
-          ];
-          
-          // Periksa apakah status cocok dengan salah satu pola "LULUS"
-          for (const pattern of lulusPatterns) {
-            if (statusStr === pattern || statusStr.includes(pattern)) {
-              console.log(`Status cocok dengan pola LULUS "${pattern}", tetapi data urutan tidak lengkap, dianggap TIDAK LULUS`);
-              return false; // Meskipun status LULUS, jika data urutan tidak lengkap, dianggap TIDAK LULUS
-            }
-          }
-          
-          console.log('Status tidak cocok dengan pola LULUS, dianggap TIDAK LULUS');
-          return false;
-        }
-        
-        // Default: jika tidak ada kondisi yang terpenuhi, anggap TIDAK LULUS
-        console.log('Tidak ada kondisi yang terpenuhi, default ke TIDAK LULUS');
+        // Jika kolomUrutan atau nomorUrutan kosong, siswa TIDAK LULUS
+        console.log('Kolom Urutan atau Nomor Urutan kosong, siswa TIDAK LULUS');
         return false;
       }
       
@@ -1161,5 +1166,5 @@
       console.log('Aplikasi dimulai');
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5877f71fb5fa8',t:'MTc0OTE4Nzk0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b59fae4626fd61',t:'MTc0OTE4ODkzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pengumuman Kelulusan SPMB SMP NEGERI 1 BULUKUMBA 2025/2026</title>
+  <title>Pengumuman Kelulusan SMP NEGERI 1 BULUKUMBA 2025/2026</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -73,7 +73,7 @@
     .logo-header img {
       max-width: 100%;
       height: auto;
-      max-height: 120px;
+      max-height: 150px; /* Ukuran logo diperbesar */
       object-fit: contain;
     }
     
@@ -89,6 +89,9 @@
       color: var(--text-light);
       font-size: 1rem;
       font-weight: 500;
+      white-space: nowrap; /* Mencegah text wrapping */
+      overflow: hidden;
+      text-overflow: ellipsis; /* Menambahkan elipsis jika teks terlalu panjang */
     }
     
     .search-form {
@@ -165,7 +168,7 @@
     
     .status-container.tidak-lulus {
       background-color: var(--danger-dark);
-      padding: 20px 20px 10px 20px;
+      padding: 20px;
     }
     
     .status {
@@ -183,29 +186,26 @@
       color: var(--danger-light);
     }
     
-    /* Pesan Bar Style untuk Tidak Lulus */
+    /* Pesan Bar Style untuk Tidak Lulus - Diubah menjadi satu kolom penuh */
     .pesan-container {
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
       margin-top: 10px;
     }
     
     .pesan-bar {
       background: #111;
       color: #fff;
-      padding: 1px 10px; /* Disempitkan padding atas-bawah */
+      padding: 5px 10px;
       font-size: 16px;
-      margin-bottom: 2px; /* Jarak antar baris diperkecil */
+      margin-bottom: 0;
       text-align: center;
       font-weight: normal;
       letter-spacing: 0.5px;
-      display: inline-block;
-      line-height: 1.3; /* Menyesuaikan line-height agar lebih rapat */
-    }
-    
-    .pesan-bar:last-child {
-      margin-bottom: 0;
+      width: 100%; /* Lebar penuh */
+      line-height: 1.3;
     }
     
     .card-detail {
@@ -278,11 +278,11 @@
     }
     
     .school-info {
-      margin-top: 4px; /* Jarak diperkecil */
+      margin-top: 4px;
       font-weight: 500;
-      color: var(--text-light); /* Warna sama dengan tulisan di atasnya */
+      color: var(--text-light);
       text-align: center;
-      line-height: 1.4; /* Line height diperkecil */
+      line-height: 1.4;
     }
     
     .contact-info {
@@ -430,7 +430,11 @@
       
       .pesan-bar {
         font-size: 14px;
-        padding: 1px 8px;
+        padding: 5px 8px;
+      }
+      
+      .logo-header img {
+        max-height: 120px; /* Tetap besar di mobile */
       }
     }
   </style>
@@ -444,8 +448,8 @@
           <img src="logosekolah.png" alt="Logo SMP Negeri 1 Bulukumba">
         </div>
       </div>
-      <h1>PENGUMUMAN KELULUSAN SPMB</h1>
-      <h2>Tahun Ajaran 2025/2026</h2>
+      <h1>PENGUMUMAN KELULUSAN</h1>
+      <h2>Sistem Penerimaan Murid Baru</h2>
     </div>
     
     <div class="search-form">
@@ -463,9 +467,7 @@
         <div class="status" id="statusKelulusan">LULUS</div>
         <div id="pesanContainer" style="display: none;">
           <div class="pesan-container">
-            <div class="pesan-bar">Hasil seleksi belum sesuai harapan</div>
-            <div class="pesan-bar">Terima kasih atas partisipasinya</div>
-            <div class="pesan-bar">Semoga sukses di kesempatan yang lain</div>
+            <div class="pesan-bar">Hasil seleksi belum sesuai harapan. Terima kasih atas partisipasinya. Semoga sukses di kesempatan yang lain.</div>
           </div>
         </div>
       </div>
@@ -507,9 +509,10 @@
     </div>
     
     <div class="footer">
-      <p>SPMB SMP Negeri 1 Bulukumba Tahun Ajaran 2025/2026</p>
+      <p>SMP Negeri 1 Bulukumba</p>
       <div class="school-info">
         <p>email : smpn01_bulukumba@yahoo.co.id</p>
+        <p>2025/2026</p>
       </div>
       <p class="contact-info" id="contactInfo">Narahubung: Andizzul – 085299613808</p>
     </div>
@@ -984,18 +987,6 @@
         });
       }
       
-      // Fungsi untuk menyesuaikan lebar pesan bar
-      function adjustPesanBarWidth() {
-        const pesanBars = document.querySelectorAll('.pesan-bar');
-        pesanBars.forEach(bar => {
-          // Reset width untuk pengukuran yang akurat
-          bar.style.width = 'auto';
-          // Ukur konten dan tambahkan sedikit padding
-          const contentWidth = bar.offsetWidth;
-          bar.style.width = contentWidth + 'px';
-        });
-      }
-      
       // Fungsi untuk memeriksa status kelulusan berdasarkan kombinasi kolom
       function isLulus(siswa) {
         if (!siswa) {
@@ -1134,18 +1125,8 @@
             pesanContainer.style.display = "block";
             keterangan.textContent = "Jangan berkecil hati, peluang lain masih terbuka lebar.";
             contactInfo.style.display = 'none';
-            
-            // Sesuaikan lebar pesan bar setelah ditampilkan
-            setTimeout(adjustPesanBarWidth, 10);
           }
         }, 4000);
-      });
-      
-      // Sesuaikan lebar pesan bar saat ukuran window berubah
-      window.addEventListener('resize', function() {
-        if (pesanContainer.style.display !== 'none') {
-          adjustPesanBarWidth();
-        }
       });
       
       // Tambahkan event listener untuk tombol Enter pada input nomor pendaftaran
@@ -1156,5 +1137,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b6226e5061f93f',t:'MTc0OTE5NDI5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94cf8481d108cdf6',t:'MTc0OTQ2MDQ1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

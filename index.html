@@ -19,7 +19,7 @@
       --white: #ffffff;
       --border-color: #dddfe2;
       --success: #42b72a;
-      --success-light: #ffff80; /* Kuning terang */
+      --success-light: #ffffff; /* Diubah dari kuning menjadi putih */
       --success-dark: #2a7d1b;
       --danger: #fa383e;
       --danger-light: #ffffff; /* Putih terang */
@@ -82,6 +82,7 @@
       margin-bottom: 0px; /* Jarak dihilangkan untuk merapatkan dengan h2 */
       font-weight: 700;
       letter-spacing: 0.5px;
+      line-height: 1.2; /* Mengurangi line height untuk mendekatkan dengan h2 */
     }
     
     h2 {
@@ -91,6 +92,8 @@
       white-space: nowrap; /* Mencegah text wrapping */
       overflow: hidden;
       text-overflow: ellipsis; /* Menambahkan elipsis jika teks terlalu panjang */
+      margin-top: 0; /* Menghilangkan margin top untuk mendekatkan dengan h1 */
+      line-height: 1.2; /* Mengurangi line height */
     }
     
     .search-form {
@@ -171,7 +174,7 @@
     }
     
     .status {
-      font-size: 28px;
+      font-size: 32px; /* Ukuran font diperbesar dari 28px menjadi 32px */
       font-weight: 700;
       margin-bottom: 5px;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -277,11 +280,11 @@
     }
     
     .school-info {
-      margin-top: 4px;
+      margin-top: 0; /* Diubah dari 4px menjadi 0 */
       font-weight: 500;
       color: var(--text-light);
       text-align: center;
-      line-height: 1.4;
+      line-height: 1.2; /* Diubah dari 1.4 menjadi 1.2 */
     }
     
     .contact-info {
@@ -578,9 +581,9 @@
       // Fungsi untuk mengambil data dari Google Sheets
       async function fetchData() {
         try {
-          // Tampilkan informasi bahwa data sedang dimuat
-          dataInfo.textContent = 'Memuat data kelulusan...';
-          dataInfo.style.display = 'block';
+          // Tidak menampilkan informasi bahwa data sedang dimuat (dihilangkan)
+          // dataInfo.textContent = 'Memuat data kelulusan...';
+          // dataInfo.style.display = 'block';
           
           // Tambahkan parameter waktu untuk menghindari cache
           const timestamp = new Date().getTime();
@@ -618,11 +621,11 @@
             dataSiswa = parsedData;
             dataLoaded = true;
             
-            // Tampilkan informasi bahwa data berhasil dimuat
-            dataInfo.textContent = `Data kelulusan berhasil dimuat (${dataSiswa.length} data)`;
-            setTimeout(() => {
-              dataInfo.style.display = 'none';
-            }, 3000);
+            // Tidak menampilkan informasi bahwa data berhasil dimuat (dihilangkan)
+            // dataInfo.textContent = `Data kelulusan berhasil dimuat (${dataSiswa.length} data)`;
+            // setTimeout(() => {
+            //   dataInfo.style.display = 'none';
+            // }, 3000);
             
             // Buat elemen slideshow dari data Google Sheets
             createSlideshowItems();
@@ -633,10 +636,11 @@
             dataSiswa = sampleData;
             dataLoaded = true;
             
-            dataInfo.textContent = `Menggunakan data contoh (${dataSiswa.length} data)`;
-            setTimeout(() => {
-              dataInfo.style.display = 'none';
-            }, 3000);
+            // Tidak menampilkan informasi bahwa data contoh digunakan (dihilangkan)
+            // dataInfo.textContent = `Menggunakan data contoh (${dataSiswa.length} data)`;
+            // setTimeout(() => {
+            //   dataInfo.style.display = 'none';
+            // }, 3000);
             
             createSlideshowItems();
             return true;
@@ -649,10 +653,11 @@
           dataSiswa = sampleData;
           dataLoaded = true;
           
-          dataInfo.textContent = `Menggunakan data contoh (${dataSiswa.length} data)`;
-          setTimeout(() => {
-            dataInfo.style.display = 'none';
-          }, 3000);
+          // Tidak menampilkan informasi bahwa data contoh digunakan (dihilangkan)
+          // dataInfo.textContent = `Menggunakan data contoh (${dataSiswa.length} data)`;
+          // setTimeout(() => {
+          //   dataInfo.style.display = 'none';
+          // }, 3000);
           
           createSlideshowItems();
           return true;
@@ -891,7 +896,10 @@
         slideshowContainer.innerHTML = '';
         
         // Ambil maksimal 10 data untuk slideshow
-        const slideshowData = dataSiswa.slice(0, 10);
+        let slideshowData = dataSiswa.slice(0, 10);
+        
+        // Acak urutan data untuk slideshow
+        slideshowData = shuffleArray(slideshowData);
         
         slideshowData.forEach((siswa) => {
           const item = document.createElement('div');
@@ -910,6 +918,16 @@
           item.appendChild(schoolElement);
           slideshowContainer.appendChild(item);
         });
+      }
+      
+      // Fungsi untuk mengacak array (algoritma Fisher-Yates shuffle)
+      function shuffleArray(array) {
+        const newArray = [...array]; // Buat salinan array
+        for (let i = newArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // Tukar elemen
+        }
+        return newArray;
       }
       
       // Fungsi untuk slideshow
@@ -947,7 +965,7 @@
           }
           
           slideshowItems[slideIndex - 1].style.display = "block";
-        }, 200); // Ganti setiap 200ms (sangat cepat)
+        }, 100); // Ganti setiap 100ms (lebih cepat dari sebelumnya yang 200ms)
         
         return slideshowInterval;
       }
@@ -1140,5 +1158,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d3c69cd1a7fda6',t:'MTc0OTUwNTEwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d3f283b2e0fd2b',t:'MTc0OTUwNjkwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

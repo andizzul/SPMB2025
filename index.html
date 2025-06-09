@@ -63,7 +63,7 @@
     
     .logo-header {
       width: 100%;
-      max-width: 300px; /* Lebar maksimum logo */
+      max-width: 200px; /* Ukuran logo dikurangi dari 300px menjadi 200px */
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -79,7 +79,7 @@
     h1 {
       color: var(--primary);
       font-size: 1.5rem;
-      margin-bottom: -4px; /* Dikurangi untuk mrapatkan dengan h2 */
+      margin-bottom: 0px; /* Jarak dihilangkan untuk merapatkan dengan h2 */
       font-weight: 700;
       letter-spacing: 0.5px;
     }
@@ -430,6 +430,10 @@
       .pesan-bar {
         font-size: 14px;
         padding: 5px 8px;
+      }
+      
+      .logo-header {
+        max-width: 150px; /* Ukuran logo di mobile lebih kecil */
       }
     }
   </style>
@@ -1111,8 +1115,13 @@
             pesanContainer.style.display = "none";
             
             // PERBAIKAN: Pastikan kolomUrutan dan nomorUrutan ditampilkan dengan benar
-            const kolom = siswa.kolomUrutan || "-";
-            const nomor = siswa.nomorUrutan || "-";
+            // Debug untuk melihat nilai yang sebenarnya
+            console.log('Kolom Urutan yang akan ditampilkan:', siswa.kolomUrutan);
+            console.log('Nomor Urutan yang akan ditampilkan:', siswa.nomorUrutan);
+            
+            // Pastikan nilai yang ditampilkan adalah string
+            const kolom = String(siswa.kolomUrutan || "-");
+            const nomor = String(siswa.nomorUrutan || "-");
             
             keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${kolom}</span> urutan <span class="highlight">${nomor}</span> pada lembar pengumuman.`;
             contactInfo.style.display = 'block';
@@ -1136,5 +1145,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94cfb283e2b73f6f',t:'MTc0OTQ2MjMzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94cfcc92f25a44a7',t:'MTc0OTQ2MzQwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

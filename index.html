@@ -1114,15 +1114,11 @@
             statusKelulusan.className = "status lulus";
             pesanContainer.style.display = "none";
             
-            // PERBAIKAN: Pastikan kolomUrutan dan nomorUrutan ditampilkan dengan benar
-            // Debug untuk melihat nilai yang sebenarnya
-            console.log('Kolom Urutan yang akan ditampilkan:', siswa.kolomUrutan);
-            console.log('Nomor Urutan yang akan ditampilkan:', siswa.nomorUrutan);
-            
-            // Pastikan nilai yang ditampilkan adalah string
+            // PERBAIKAN: Format keterangan sesuai permintaan
             const kolom = String(siswa.kolomUrutan || "-");
             const nomor = String(siswa.nomorUrutan || "-");
             
+            // Format keterangan sesuai permintaan
             keterangan.innerHTML = `Data kelulusan Anda berada pada kolom <span class="highlight">${kolom}</span> urutan <span class="highlight">${nomor}</span> pada lembar pengumuman.`;
             contactInfo.style.display = 'block';
           } else {
@@ -1145,5 +1141,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94cfcc92f25a44a7',t:'MTc0OTQ2MzQwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d02850c0faef6c',t:'MTc0OTQ2NzE2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

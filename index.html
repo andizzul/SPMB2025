@@ -540,7 +540,7 @@
     // Data contoh untuk pengujian (akan digunakan jika data dari Google Sheets gagal dimuat)
     const sampleData = [
       {
-        noPendaftaran: "2500126",
+        noPendaftaran: "25010",
         nama: "AHMAD RIFAI",
         ttl: "Bulukumba 27 Mei 2025",
         asalSekolah: "SD Negeri 1 Bantaeng",
@@ -713,6 +713,37 @@
             );
             console.log('Menggunakan kolom alternatif untuk No Pendaftaran:', 
                       columnIndices.noPendaftaran >= 0 ? headers[columnIndices.noPendaftaran] : 'Tidak ditemukan');
+          }
+          
+          // Jika tidak menemukan kolom kolomUrutan, coba cari dengan nama lain atau gunakan indeks langsung
+          if (columnIndices.kolomUrutan === -1) {
+            // Coba cari dengan nama kolom yang lebih spesifik
+            columnIndices.kolomUrutan = headers.findIndex(h => 
+              h.toLowerCase() === 'kolom' || 
+              h.toLowerCase() === 'kolomurutan'
+            );
+            
+            // Jika masih tidak ditemukan, gunakan indeks 7 (kolom H) sebagai fallback
+            if (columnIndices.kolomUrutan === -1) {
+              columnIndices.kolomUrutan = 7; // Indeks 7 adalah kolom H (0-based)
+              console.log('Menggunakan indeks 7 (kolom H) untuk kolomUrutan');
+            }
+          }
+          
+          // Jika tidak menemukan kolom nomorUrutan, coba cari dengan nama lain atau gunakan indeks langsung
+          if (columnIndices.nomorUrutan === -1) {
+            // Coba cari dengan nama kolom yang lebih spesifik
+            columnIndices.nomorUrutan = headers.findIndex(h => 
+              h.toLowerCase() === 'nomor' || 
+              h.toLowerCase() === 'urutan' ||
+              h.toLowerCase() === 'nomorurutan'
+            );
+            
+            // Jika masih tidak ditemukan, gunakan indeks 8 (kolom I) sebagai fallback
+            if (columnIndices.nomorUrutan === -1) {
+              columnIndices.nomorUrutan = 8; // Indeks 8 adalah kolom I (0-based)
+              console.log('Menggunakan indeks 8 (kolom I) untuk nomorUrutan');
+            }
           }
           
           // Proses setiap baris data
@@ -1114,7 +1145,12 @@
             statusKelulusan.className = "status lulus";
             pesanContainer.style.display = "none";
             
-            // PERBAIKAN: Format keterangan sesuai permintaan
+            // PERBAIKAN: Pastikan kolomUrutan dan nomorUrutan ditampilkan dengan benar
+            // Debug untuk melihat nilai yang sebenarnya
+            console.log('Kolom Urutan yang akan ditampilkan:', siswa.kolomUrutan);
+            console.log('Nomor Urutan yang akan ditampilkan:', siswa.nomorUrutan);
+            
+            // Pastikan nilai yang ditampilkan adalah string
             const kolom = String(siswa.kolomUrutan || "-");
             const nomor = String(siswa.nomorUrutan || "-");
             
@@ -1141,5 +1177,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d02850c0faef6c',t:'MTc0OTQ2NzE2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d3865a666681d7',t:'MTc0OTUwMjQ3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

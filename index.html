@@ -188,7 +188,7 @@
       color: var(--danger-light);
     }
     
-    /* Pesan Bar Style untuk Tidak Lulus - Diubah menjadi satu kolom penuh */
+    /* Pesan Bar Style untuk Tidak Lulus dan Lulus */
     .pesan-container {
       display: flex;
       flex-direction: column;
@@ -208,6 +208,10 @@
       letter-spacing: 0.5px;
       width: 100%; /* Lebar penuh */
       line-height: 1.3;
+    }
+    
+    .pesan-bar.lulus {
+      background: #1a5517; /* Warna hijau gelap untuk pesan lulus */
     }
     
     .card-detail {
@@ -300,8 +304,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(5px);
+      background-color: rgba(0, 0, 0, 0.7); /* Lebih gelap dan lebih kabur */
+      backdrop-filter: blur(8px); /* Lebih kabur */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -313,22 +317,26 @@
     .spinner {
       width: 70px;
       height: 70px;
-      border: 8px solid rgba(24, 119, 242, 0.2);
+      border: 8px solid rgba(255, 255, 255, 0.3); /* Lebih terang */
       border-radius: 50%;
-      border-top-color: var(--primary);
+      border-top-color: var(--white); /* Putih untuk kontras lebih baik */
       animation: spin 1s linear infinite;
       margin-bottom: 30px;
     }
     
     .loading-text {
       font-weight: 600;
-      color: var(--primary);
+      color: var(--white); /* Putih untuk kontras lebih baik */
       margin-bottom: 20px;
     }
     
     .slideshow-container {
       text-align: center;
       max-width: 80%;
+      background-color: rgba(255, 255, 255, 0.15); /* Background semi-transparan */
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); /* Glow effect */
     }
     
     .slideshow-item {
@@ -341,20 +349,23 @@
       animation: pulseEffect 1s infinite;
       padding: 15px;
       border-radius: 8px;
-      background-color: rgba(24, 119, 242, 0.1);
-      border: 2px solid var(--primary);
+      background-color: rgba(255, 255, 255, 0.25); /* Lebih terang */
+      border: 2px solid var(--white);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); /* Glow effect lebih kuat */
     }
     
     .slideshow-name {
       font-size: 18px;
       font-weight: 600;
-      color: var(--primary);
+      color: var(--white); /* Putih untuk kontras lebih baik */
       margin-bottom: 5px;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Glow effect pada teks */
     }
     
     .slideshow-school {
       font-size: 14px;
-      color: var(--text-light);
+      color: rgba(255, 255, 255, 0.8); /* Putih semi-transparan */
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.3); /* Glow effect pada teks */
     }
     
     .error-message {
@@ -386,13 +397,13 @@
     
     @keyframes pulseEffect {
       0% {
-        box-shadow: 0 0 0 0 rgba(24, 119, 242, 0.4);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
       }
       70% {
-        box-shadow: 0 0 0 10px rgba(24, 119, 242, 0);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
       }
       100% {
-        box-shadow: 0 0 0 0 rgba(24, 119, 242, 0);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
       }
     }
     
@@ -466,10 +477,15 @@
     
     <div class="result" id="resultContainer">
       <div class="status-container" id="statusContainer">
-        <div class="status" id="statusKelulusan">LULUS</div>
+        <div class="status" id="statusKelulusan">DITERIMA</div>
         <div id="pesanContainer" style="display: none;">
           <div class="pesan-container">
-            <div class="pesan-bar">Hasil seleksi belum sesuai harapan. Terima kasih atas partisipasinya. Semoga sukses di lain kesempatan.</div>
+            <div class="pesan-bar" id="pesanBar">Hasil seleksi belum sesuai harapan. Terima kasih atas partisipasinya. Semoga sukses di lain kesempatan.</div>
+          </div>
+        </div>
+        <div id="pesanLulusContainer" style="display: none;">
+          <div class="pesan-container">
+            <div class="pesan-bar lulus">Selamat, Anda dinyatakan lulus pada Sistem Penerimaan Murid Baru SMP Negeri 1 Bulukumba. Silahkan melanjutkan proses pendaftaran ulang sesuai jadwal yang telah ditentukan</div>
           </div>
         </div>
       </div>
@@ -563,6 +579,7 @@
       const statusContainer = document.getElementById('statusContainer');
       const statusKelulusan = document.getElementById('statusKelulusan');
       const pesanContainer = document.getElementById('pesanContainer');
+      const pesanLulusContainer = document.getElementById('pesanLulusContainer');
       const nama = document.getElementById('nama');
       const ttl = document.getElementById('ttl');
       const asalSekolah = document.getElementById('asalSekolah');
@@ -1131,9 +1148,10 @@
           if (statusLulus) {
             console.log('Siswa LULUS');
             statusContainer.className = "status-container lulus";
-            statusKelulusan.textContent = "LULUS";
+            statusKelulusan.textContent = "DITERIMA"; // Diubah dari LULUS menjadi DITERIMA
             statusKelulusan.className = "status lulus";
             pesanContainer.style.display = "none";
+            pesanLulusContainer.style.display = "block"; // Tampilkan pesan untuk yang lulus
             
             // Tampilkan keterangan dari kolom Keterangan
             keterangan.textContent = siswa.keterangan || "Data kelulusan Anda telah diumumkan.";
@@ -1144,6 +1162,7 @@
             statusKelulusan.textContent = "MOHON MAAF";
             statusKelulusan.className = "status tidak-lulus";
             pesanContainer.style.display = "block";
+            pesanLulusContainer.style.display = "none"; // Sembunyikan pesan untuk yang lulus
             keterangan.textContent = "Jangan berkecil hati, peluang lain masih terbuka lebar.";
             contactInfo.style.display = 'none';
           }
@@ -1158,5 +1177,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d3f283b2e0fd2b',t:'MTc0OTUwNjkwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d5e04181690b9e',t:'MTc0OTUyNzEyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

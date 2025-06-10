@@ -485,7 +485,7 @@
         </div>
         <div id="pesanLulusContainer" style="display: none;">
           <div class="pesan-container">
-            <div class="pesan-bar lulus">Selamat, Anda dinyatakan lulus pada Sistem Penerimaan Murid Baru SMP Negeri 1 Bulukumba. Silahkan melanjutkan proses pendaftaran ulang sesuai jadwal yang telah ditentukan</div>
+            <div class="pesan-bar lulus">Selamat, Anda dinyatakan lulus pada SPMB SMP Negeri 1 Bulukumba. Silahkan lanjutkan proses pendaftaran ulang sesuai jadwal yang telah ditentukan.</div>
           </div>
         </div>
       </div>
@@ -1016,11 +1016,11 @@
         // Ubah teks loading
         loadingText.textContent = "Siswa ditemukan!";
         
-        // Tampilkan selama 3 detik
+        // Tampilkan selama 4 detik (diubah dari 3 detik)
         return new Promise(resolve => {
           setTimeout(() => {
             resolve();
-          }, 3000);
+          }, 4000); // Diubah dari 3000 menjadi 4000 (4 detik)
         });
       }
       
@@ -1110,11 +1110,12 @@
         // Mulai slideshow
         startSlideshow();
         
-        // Simulasi loading selama 4 detik
+        // Simulasi loading slideshow selama 8 detik (diubah dari 4 detik)
         setTimeout(async function() {
           // Hentikan slideshow dan tampilkan siswa yang ditemukan
           await showFoundStudent(siswa);
           
+          // Setelah menampilkan siswa yang ditemukan selama 4 detik, lanjutkan ke hasil
           // Sembunyikan loading overlay
           loadingOverlay.style.display = 'none';
           console.log('Loading selesai, menyembunyikan overlay');
@@ -1166,7 +1167,7 @@
             keterangan.textContent = "Jangan berkecil hati, peluang lain masih terbuka lebar.";
             contactInfo.style.display = 'none';
           }
-        }, 4000);
+        }, 8000); // Diubah dari 4000 menjadi 8000 (8 detik)
       });
       
       // Tambahkan event listener untuk tombol Enter pada input nomor pendaftaran
@@ -1177,5 +1178,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d5e04181690b9e',t:'MTc0OTUyNzEyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d678d0f56de60e',t:'MTc0OTUzMzM3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

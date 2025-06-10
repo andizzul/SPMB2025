@@ -290,35 +290,72 @@
       color: var(--danger-light);
     }
     
-    /* Badge untuk status lulus */
-    .badge {
+    /* Badge/Stempel untuk status lulus */
+    .badge-stamp {
       position: absolute;
       top: 10px;
       right: 10px;
-      width: 60px;
-      height: 60px;
-      background-color: var(--success-light);
-      border-radius: 50%;
+      width: 80px;
+      height: 80px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      z-index: 3;
       transform: rotate(15deg);
-      z-index: 1;
+      animation: stampPulse 2s infinite alternate;
     }
     
-    .badge::before {
+    @keyframes stampPulse {
+      0% {
+        transform: rotate(15deg) scale(1);
+      }
+      100% {
+        transform: rotate(15deg) scale(1.05);
+      }
+    }
+    
+    .badge-outer {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    
+    .badge-outer::before {
       content: '';
       position: absolute;
-      width: 54px;
-      height: 54px;
+      width: 90%;
+      height: 90%;
       border: 2px dashed var(--success-dark);
       border-radius: 50%;
     }
     
+    .badge-inner {
+      width: 85%;
+      height: 85%;
+      border-radius: 50%;
+      background: var(--success-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: center;
+      text-transform: uppercase;
+      line-height: 1;
+      padding: 2px;
+    }
+    
     .badge-icon {
-      color: var(--success-dark);
-      font-size: 24px;
+      font-size: 18px;
+      margin-bottom: 2px;
     }
     
     /* Pesan Bar Style untuk Tidak Lulus dan Lulus */
@@ -606,13 +643,16 @@
       height: 10px;
       background-color: #f2d74e;
       opacity: 0.8;
-      animation: confetti-fall 3s linear infinite;
+      animation: confetti-fall 5s linear infinite; /* Diperlambat dari 3s menjadi 5s */
     }
     
     @keyframes confetti-fall {
       0% {
         transform: translateY(-100px) rotate(0deg);
         opacity: 1;
+      }
+      80% {
+        opacity: 0.8;
       }
       100% {
         transform: translateY(600px) rotate(360deg);
@@ -696,12 +736,12 @@
       height: 5px;
       border-radius: 50%;
       box-shadow: 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff;
-      animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards, 5s position linear infinite backwards;
+      animation: 2s bang ease-out infinite backwards, 2s gravity ease-in infinite backwards, 7s position linear infinite backwards; /* Diperlambat */
     }
     
     .pyro > .after {
-      animation-delay: 1.25s, 1.25s, 1.25s;
-      animation-duration: 1.25s, 1.25s, 6.25s;
+      animation-delay: 1.5s, 1.5s, 1.5s;
+      animation-duration: 2s, 2s, 7s; /* Diperlambat */
     }
     
     @keyframes bang {
@@ -772,18 +812,17 @@
         max-width: 150px;
       }
       
-      .badge {
-        width: 50px;
-        height: 50px;
+      .badge-stamp {
+        width: 60px;
+        height: 60px;
       }
       
-      .badge::before {
-        width: 44px;
-        height: 44px;
+      .badge-inner {
+        font-size: 10px;
       }
       
       .badge-icon {
-        font-size: 20px;
+        font-size: 14px;
       }
     }
   </style>
@@ -823,9 +862,14 @@
         </div>
         <div class="confetti-container" id="confettiContainer"></div>
         
-        <!-- Badge untuk status lulus -->
-        <div class="badge" id="lulusBadge" style="display: none;">
-          <i class="fas fa-check-circle badge-icon"></i>
+        <!-- Stempel DITERIMA yang lebih jelas -->
+        <div class="badge-stamp" id="lulusBadge" style="display: none;">
+          <div class="badge-outer">
+            <div class="badge-inner">
+              <i class="fas fa-check-circle badge-icon"></i>
+              <span>Diterima</span>
+            </div>
+          </div>
         </div>
         
         <div class="status" id="statusKelulusan">DITERIMA</div>
@@ -979,8 +1023,8 @@
           confetti.style.width = Math.random() * 10 + 5 + 'px';
           confetti.style.height = Math.random() * 10 + 5 + 'px';
           confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-          confetti.style.animationDelay = Math.random() * 3 + 's';
-          confetti.style.animationDuration = Math.random() * 2 + 3 + 's';
+          confetti.style.animationDelay = Math.random() * 5 + 's'; // Lebih bervariasi
+          confetti.style.animationDuration = Math.random() * 3 + 5 + 's'; // Diperlambat
           confetti.style.opacity = Math.random() + 0.5;
           
           // Bentuk konfeti yang berbeda-beda
@@ -1472,6 +1516,46 @@
         button.appendChild(circle);
       }
       
+      // Fungsi untuk reset tampilan hasil
+      function resetResultDisplay() {
+        // Sembunyikan hasil sebelumnya
+        resultContainer.classList.remove('show');
+        resultContainer.style.display = 'none';
+        
+        // Reset pesan error
+        errorMessage.classList.remove('show');
+        errorMessage.style.display = 'none';
+        
+        // Reset data info
+        dataInfo.classList.remove('show');
+        dataInfo.style.display = 'none';
+        
+        // Reset konfeti dan fireworks
+        confettiContainer.innerHTML = '';
+        fireworks.style.display = 'none';
+        
+        // Reset badge/stempel
+        lulusBadge.style.display = 'none';
+        
+        // Reset status container
+        statusContainer.className = 'status-container';
+        
+        // Reset pesan container
+        pesanContainer.style.display = 'none';
+        pesanLulusContainer.style.display = 'none';
+        
+        // Reset nilai-nilai dalam tabel
+        document.getElementById('nama').textContent = '-';
+        document.getElementById('ttl').textContent = '-';
+        document.getElementById('asalSekolah').textContent = '-';
+        document.getElementById('jalur').textContent = '-';
+        document.getElementById('namaAyah').textContent = '-';
+        document.getElementById('keterangan').textContent = '-';
+        
+        // Reset contact info
+        contactInfo.style.display = 'none';
+      }
+      
       cekButton.addEventListener('click', async function(e) {
         createRippleEffect(e);
         
@@ -1484,9 +1568,8 @@
           return;
         }
         
-        // Reset pesan error
-        errorMessage.classList.remove('show');
-        errorMessage.style.display = 'none';
+        // Reset tampilan hasil sebelumnya
+        resetResultDisplay();
         
         // Jika data belum diambil, coba ambil lagi
         if (!dataLoaded || dataSiswa.length === 0) {
@@ -1507,7 +1590,6 @@
           setTimeout(() => {
             errorMessage.classList.add('show');
           }, 10);
-          resultContainer.style.display = 'none';
           console.log('Nomor pendaftaran tidak ditemukan:', noPendaftaran);
           return;
         }
@@ -1547,7 +1629,6 @@
             setTimeout(() => {
               errorMessage.classList.add('show');
             }, 10);
-            resultContainer.style.display = 'none';
             console.log('Data status kelulusan tidak tersedia');
             return;
           }
@@ -1576,7 +1657,7 @@
             pesanContainer.style.display = "none";
             pesanLulusContainer.style.display = "block";
             
-            // Tampilkan badge
+            // Tampilkan badge/stempel
             lulusBadge.style.display = "flex";
             
             // Tampilkan konfeti dan fireworks
@@ -1626,5 +1707,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d69d822111fdb7',t:'MTc0OTUzNDg3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d6c7bff2193e4f',t:'MTc0OTUzNjYwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

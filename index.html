@@ -780,6 +780,32 @@
       }
     }
     
+    /* Pesan pengumuman belum dirilis */
+    .announcement-pending {
+      background-color: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffeeba;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+      }
+    }
+    
     @media (max-width: 480px) {
       .row-detail {
         flex-direction: column;
@@ -851,6 +877,9 @@
       </button>
       <div class="error-message" id="errorMessage"></div>
       <div class="data-info" id="dataInfo"></div>
+      <div class="announcement-pending" id="announcementPending" style="display: none;">
+        Hasil Pengumuman Akan Dirilis Sesuai Jadwal
+      </div>
     </div>
     
     <div class="result" id="resultContainer">
@@ -961,6 +990,7 @@
     // Variabel untuk menyimpan data siswa
     let dataSiswa = [];
     let dataLoaded = false;
+    let dataAccessible = true; // Flag untuk menandai apakah data dapat diakses
     
     // Data contoh untuk pengujian (akan digunakan jika data dari Google Sheets gagal dimuat)
     const sampleData = [
@@ -999,6 +1029,7 @@
       const fireworks = document.getElementById('fireworks');
       const confettiContainer = document.getElementById('confettiContainer');
       const lulusBadge = document.getElementById('lulusBadge');
+      const announcementPending = document.getElementById('announcementPending');
       
       // Efek parallax untuk background
       window.addEventListener('scroll', function() {
@@ -1062,11 +1093,24 @@
           const response = await fetch(url, options);
           
           if (!response.ok) {
+            // Jika status 403 (Forbidden), berarti akses dibatasi
+            if (response.status === 403) {
+              console.log('Akses ke Google Sheets dibatasi');
+              dataAccessible = false;
+              return false;
+            }
             throw new Error(`Gagal mengambil data: ${response.status} ${response.statusText}`);
           }
           
           const csvData = await response.text();
           console.log('Data CSV diterima, panjang:', csvData.length);
+          
+          // Jika data kosong atau hanya berisi pesan error
+          if (!csvData || csvData.includes('Error') || csvData.includes('Access denied')) {
+            console.log('Data tidak dapat diakses atau berisi pesan error');
+            dataAccessible = false;
+            return false;
+          }
           
           // Tampilkan beberapa baris pertama untuk debugging
           const firstLines = csvData.split('\n').slice(0, 3).join('\n');
@@ -1078,6 +1122,7 @@
           if (parsedData.length > 0) {
             dataSiswa = parsedData;
             dataLoaded = true;
+            dataAccessible = true;
             
             // Buat elemen slideshow dari data Google Sheets
             createSlideshowItems();
@@ -1087,6 +1132,7 @@
             // Gunakan data contoh jika tidak ada data yang ditemukan
             dataSiswa = sampleData;
             dataLoaded = true;
+            dataAccessible = true;
             
             createSlideshowItems();
             return true;
@@ -1094,10 +1140,20 @@
         } catch (error) {
           console.error('Error saat mengambil data:', error);
           
+          // Periksa apakah error terkait dengan akses yang dibatasi
+          if (error.message.includes('403') || 
+              error.message.includes('Forbidden') || 
+              error.message.includes('Access denied')) {
+            console.log('Akses ke Google Sheets dibatasi');
+            dataAccessible = false;
+            return false;
+          }
+          
           // Gunakan data contoh jika terjadi kesalahan
           console.log('Menggunakan data contoh karena terjadi kesalahan');
           dataSiswa = sampleData;
           dataLoaded = true;
+          dataAccessible = true;
           
           createSlideshowItems();
           return true;
@@ -1258,7 +1314,7 @@
         return result;
       }
       
-      // Fungsi untuk mencari siswa dengan nomor pendaftaran
+      // Fungsi untuk mencari siswa dengan nomor pendaftaran (DIPERBARUI: hanya kecocokan eksak)
       function findSiswa(noPendaftaran) {
         if (!noPendaftaran || dataSiswa.length === 0) {
           return null;
@@ -1276,18 +1332,18 @@
           }
         });
         
-        // 1. Coba pencarian eksak (case sensitive)
+        // Hanya cari kecocokan eksak (case sensitive)
         for (const siswa of dataSiswa) {
           if (!siswa.noPendaftaran) continue;
           
           const siswaNoPendaftaran = String(siswa.noPendaftaran).trim();
           if (siswaNoPendaftaran === cleanNoPendaftaran) {
-            console.log('Siswa ditemukan dengan kecocokan eksak (case sensitive):', siswa);
+            console.log('Siswa ditemukan dengan kecocokan eksak:', siswa);
             return siswa;
           }
         }
         
-        // 2. Coba pencarian eksak (case insensitive)
+        // Jika tidak ditemukan dengan kecocokan eksak, coba kecocokan eksak case insensitive
         for (const siswa of dataSiswa) {
           if (!siswa.noPendaftaran) continue;
           
@@ -1298,36 +1354,7 @@
           }
         }
         
-        // 3. Coba pencarian dengan normalisasi (hapus semua karakter non-alfanumerik)
-        const normalizedInput = cleanNoPendaftaran.replace(/[^a-zA-Z0-9]/g, '');
-        console.log('Nomor pendaftaran yang dinormalisasi:', normalizedInput);
-        
-        for (const siswa of dataSiswa) {
-          if (!siswa.noPendaftaran) continue;
-          
-          const siswaNoPendaftaran = String(siswa.noPendaftaran).trim();
-          const normalizedSiswa = siswaNoPendaftaran.replace(/[^a-zA-Z0-9]/g, '');
-          
-          if (normalizedSiswa === normalizedInput) {
-            console.log('Siswa ditemukan dengan kecocokan normalisasi:', siswa);
-            return siswa;
-          }
-        }
-        
-        // 4. Coba pencarian dengan substring (apakah input adalah bagian dari nomor pendaftaran)
-        for (const siswa of dataSiswa) {
-          if (!siswa.noPendaftaran) continue;
-          
-          const siswaNoPendaftaran = String(siswa.noPendaftaran).trim().toLowerCase();
-          
-          if (siswaNoPendaftaran.includes(cleanNoPendaftaran.toLowerCase()) || 
-              cleanNoPendaftaran.toLowerCase().includes(siswaNoPendaftaran)) {
-            console.log('Siswa ditemukan dengan kecocokan substring:', siswa);
-            return siswa;
-          }
-        }
-        
-        console.log('Siswa tidak ditemukan dengan semua metode pencarian');
+        console.log('Siswa tidak ditemukan dengan kecocokan eksak');
         return null;
       }
       
@@ -1530,6 +1557,9 @@
         dataInfo.classList.remove('show');
         dataInfo.style.display = 'none';
         
+        // Reset pesan pengumuman belum dirilis
+        announcementPending.style.display = 'none';
+        
         // Reset konfeti dan fireworks
         confettiContainer.innerHTML = '';
         fireworks.style.display = 'none';
@@ -1575,10 +1605,25 @@
         if (!dataLoaded || dataSiswa.length === 0) {
           console.log('Data siswa kosong, mencoba mengambil data');
           const success = await fetchData();
+          
+          // Jika data tidak dapat diakses (dibatasi)
+          if (!dataAccessible) {
+            console.log('Data tidak dapat diakses, menampilkan pesan pengumuman belum dirilis');
+            announcementPending.style.display = 'block';
+            return;
+          }
+          
           if (!success) {
             console.log('Gagal mengambil data');
             return;
           }
+        }
+        
+        // Jika data tidak dapat diakses (dibatasi)
+        if (!dataAccessible) {
+          console.log('Data tidak dapat diakses, menampilkan pesan pengumuman belum dirilis');
+          announcementPending.style.display = 'block';
+          return;
         }
         
         // Cari data siswa dengan fungsi yang diperbaiki
@@ -1707,5 +1752,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94d6c7bff2193e4f',t:'MTc0OTUzNjYwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94df15e552a387ad',t:'MTc0OTYyMzY5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
